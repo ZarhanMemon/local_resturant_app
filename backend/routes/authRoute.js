@@ -1,5 +1,5 @@
 import express from 'express';
-import { signupUser , signinUser , signoutUser} from '../controllers/authController.js';
+import { signupUser , signinUser , signoutUser ,authCheck} from '../controllers/authController.js';
 import { protectRoute } from '../middleware/protectAuth_middleware.js';
  
 
@@ -11,6 +11,7 @@ router.post('/signin' , signinUser);
  
 router.post('/signout' , protectRoute,  signoutUser);
 
- 
+ router.get('/check',protectRoute, authCheck);
+
 
 export default router;

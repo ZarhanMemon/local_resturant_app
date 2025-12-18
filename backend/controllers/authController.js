@@ -95,3 +95,20 @@ export const signoutUser = async (req, res) => {
     res.status(500).json({ message: "Sign out -> Server Error", error: error.message });
   }
 };
+
+
+// ===============================
+// Auth Check Controller
+// ===============================
+export const authCheck = (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Not authenticated" });
+        }
+
+        return res.status(200).json(req.user);
+    } catch (error) {
+        console.error("Error in authCheck controller:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
