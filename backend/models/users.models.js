@@ -31,6 +31,10 @@ const userSchema = new mongoose.Schema(
       default: "Customer",
       required: true,
     },
+
+    resetOTP:String,
+    resetOTPexpiry:Date,
+
   },
   {
     timestamps: true,

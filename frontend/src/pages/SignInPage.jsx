@@ -4,15 +4,18 @@ import { FcGoogle } from "react-icons/fc";
 import { useAuthStore } from "../context/useAuthStore";
 import toast from "react-hot-toast";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const SignInPage = () => {
-  const { login, isLoggingIn } = useAuthStore();
+  const { login, isLoggingIn, resetFormData, setResetFormData } =
+    useAuthStore();
+  const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+    email: resetFormData.email || "",
+    password: resetFormData.newPassword || "",
   });
 
   const validateForm = () => {
@@ -24,9 +27,16 @@ const SignInPage = () => {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) login(formData);
+    if (validateForm()) {
+      setResetFormData({ email: formData.email });
+
+      const success = await login(formData);
+      if (success) {
+        navigate("/home");
+      }
+    }
   };
 
   return (
@@ -36,13 +46,11 @@ const SignInPage = () => {
         <div className="space-y-1">
           <h1 className="text-2xl font-bold text-orange-500">Vingo</h1>
           <p className="text-sm text-gray-500">
-           Sign In to your account to start ordering delicious food 🍔
+            Sign In to your account to start ordering delicious food 🍔
           </p>
         </div>
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-           
-
           {/* Email */}
           <div className="space-y-1">
             <label className="text-sm font-medium text-gray-700">
@@ -58,7 +66,6 @@ const SignInPage = () => {
               }
             />
           </div>
-
           {/* Password */}
           <div className="space-y-1">
             <label className="text-sm font-medium text-gray-700">
@@ -83,8 +90,17 @@ const SignInPage = () => {
               </button>
             </div>
           </div>
-
-         
+          {/*add the forget password and reset passs logic on this */}
+          <p className=" text-sm text-gray-600">
+            {" "}
+            <Link
+              to="/forgot-password"
+              state={{ curr_email: formData.email }} // from this u can sen the parameter
+              className="font-medium text-orange-500 hover:text-orange-600 transition"
+            >
+              Forgot Password?{" "}
+            </Link>
+          </p>{" "}
           {/* Submit */}
           <button
             type="submit"
@@ -94,15 +110,12 @@ const SignInPage = () => {
             {isLoggingIn ? "Sign In..." : "Sign In"}
           </button>
         </form>
-
-
         {/* Divider */}
         <div className="flex items-center gap-2 text-gray-400 text-sm">
           <div className="flex-1 h-px bg-gray-200" />
           OR
           <div className="flex-1 h-px bg-gray-200" />
         </div>
-
         {/* Google */}
         <button className="w-full flex items-center justify-center gap-1 rounded-lg border border-gray-300 py-2 text-sm hover:bg-gray-50">
           <FcGoogle size={20} />

@@ -4,15 +4,15 @@ import { FcGoogle } from "react-icons/fc";
 import { useAuthStore } from "../context/useAuthStore";
 import toast from "react-hot-toast";
 
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
 
 const SignUpPage = () => {
   const { signup, isSigningUp } = useAuthStore();
+  const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    name: "" ,
     email: "",
     phone: "",
     password: "",
@@ -32,9 +32,15 @@ const SignUpPage = () => {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) signup(formData);
+    if (validateForm()) {
+       const success = await signup(formData);
+      if (success) {
+        navigate("/home");
+      }
+     
+    }
   };
 
   return (
@@ -165,7 +171,6 @@ const SignUpPage = () => {
           <FcGoogle size={20} />
           Continue with Google
         </button>
-        
         <p className="text-center text-sm text-gray-600">
           Already have an account?{" "}
           <Link
