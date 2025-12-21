@@ -6,13 +6,17 @@ import toast from "react-hot-toast";
 
 import { Link, useNavigate } from "react-router-dom";
 
+//firebase google auth helper
+import { googleLogin as googlePopup } from "../libs/googleAuth.js";
+
 const SignUpPage = () => {
-  const { signup, isSigningUp } = useAuthStore();
+  const { signup, isSigningUp , googleLogin } = useAuthStore();
+  
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    name: "" ,
+    name: "",
     email: "",
     phone: "",
     password: "",
@@ -26,7 +30,7 @@ const SignUpPage = () => {
     if (formData.phone.length !== 10)
       return toast.error("Mobile number must be 10 digits");
     if (!formData.password) return toast.error("Password is required");
-    if (formData.password.length < 6)
+    if (formData.password.length < 6 && formData.password)
       return toast.error("Password must be at least 6 characters");
 
     return true;
@@ -35,11 +39,34 @@ const SignUpPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-       const success = await signup(formData);
+      const success = await signup(formData);
       if (success) {
         navigate("/home");
       }
-     
+    }
+  };
+
+  // Google Signup Handler
+  // 
+  // Flow:
+  // 1. Call googlePopup() to open Firebase Google sign-in popup
+  // 2. User authenticates with Google account
+  // 3. Firebase returns user object (name, email)
+  // 4. Send user object to googleLogin() store action
+  // 5. Store sends request to /auth/google endpoint
+  // 6. Backend creates account (if new) or logs in (if exists)
+  // 7. If successful, redirect to home page
+  const handleGoogleSignup = async () => {
+    try {
+      // Open Firebase popup and wait for result
+      const googleUser = await googlePopup(); // user detail from google
+
+      const success = await googleLogin(googleUser);
+      if (success) {
+        navigate("/home");
+      }
+    } catch {
+      toast.error("Google signup failed");
     }
   };
 
@@ -134,7 +161,7 @@ const SignUpPage = () => {
               Select Role
             </label>
             <div className="flex gap-2">
-              {["Customer", "Owner", "Rider"].map((role) => (
+              {["Customer", "Admin", "Rider"].map((role) => (
                 <button
                   key={role}
                   type="button"
@@ -167,7 +194,10 @@ const SignUpPage = () => {
           <div className="flex-1 h-px bg-gray-200" />
         </div>
         {/* Google */}
-        <button className="w-full flex items-center justify-center gap-1 rounded-lg border border-gray-300 py-2 text-sm hover:bg-gray-50">
+        <button 
+        type="button"
+          onClick={handleGoogleSignup}
+        className="w-full flex items-center justify-center gap-1 rounded-lg border border-gray-300 py-2 text-sm hover:bg-gray-50">
           <FcGoogle size={20} />
           Continue with Google
         </button>

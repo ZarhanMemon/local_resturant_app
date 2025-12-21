@@ -50,9 +50,8 @@ export const signupUser = async (req, res) => {
       },
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Sign Up -> Server Error", error: error.message });
+    console.error("Error in signupUser:", error);
+    res.status(500).json({ message: "Sign Up -> Server Error", error: error.message });
   }
 };
 
@@ -88,7 +87,9 @@ export const signinUser = async (req, res) => {
 export const signoutUser = async (req, res) => {
   try {
     // 1. Delete the jwt token , from which user was in app
-    res.clearCookie("jwt");
+    // Cookie name set by generateToken is `jwt_token` (see utils/token.js)
+    // Clear that cookie on signout so protect middleware stops recognizing user
+    res.clearCookie("jwt_token");
 
     // 2. Response If no token , user logged out found
     return res.status(200).json({ message: "Sign out successfully." });
@@ -223,5 +224,63 @@ export const resetPassword = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+/**
+ * googleAuth - Unified Google Authentication Handler
+ * 
+ * Handles BOTH signup and signin flows via a single endpoint.
+ * This works because:
+ * - If email exists → user is logged in (signin)
+ * - If email is new → user account is created (signup)
+ * 
+ * Process:
+ * 1. Extract user data from Firebase: name, email, phone (if available)
+ * 2. Validate email is provided (required for both flows)
+ * 3. Query database to check if user exists by email
+ * 4. If new user:
+ *    - Create account with Google credentials
+ *    - Set phone to empty string (Firebase doesn't provide it)
+ *    - Mark provider as "google"
+ *    - Set password to null (not needed for OAuth)
+ * 5. If existing user:
+ *    - No changes to account, proceed to login
+ * 6. Generate JWT token and set secure HTTP-only cookie
+ * 7. Return user object to frontend
+ * 
+ * @param {Object} req.body - { name, email, phone }
+ * @returns {Object} User object (id, email, name, role, etc.)
+ */
+export const googleAuth = async (req, res) => {
+  try {
+    const { name, email, phone } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required for Google auth" });
+    }
+
+    // find existing user
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await User.create({
+        name: name || "",
+        email,
+        phone: phone || "",
+        role: "Customer",
+        provider: "google",
+      });
+    }
+
+    // set auth cookie and return user
+    generateToken(user._id, res);
+
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error("Google auth error:", error);
+    res.status(500).json({ message: "Google auth failed", error: error.message });
   }
 };

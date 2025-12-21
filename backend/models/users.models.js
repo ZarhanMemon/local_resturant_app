@@ -15,14 +15,12 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      required: true,
-      minlength: 6, // corrected
+      minlength: 6, // optional for OAuth users
     },
 
     phone: {
       type: String,
-      required: true,
-      maxlength: 10, // corrected
+      maxlength: 10, // corrected - optional for Google auth
     },
 
     role: {
@@ -32,9 +30,14 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
-    resetOTP:String,
-    resetOTPexpiry:Date,
+    resetOTP: String,
+    resetOTPexpiry: Date,
 
+    provider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    },
   },
   {
     timestamps: true,

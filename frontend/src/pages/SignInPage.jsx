@@ -6,9 +6,13 @@ import toast from "react-hot-toast";
 
 import { Link, useNavigate } from "react-router-dom";
 
+//firebase google auth helper
+import { googleLogin as googlePopup } from "../libs/googleAuth.js";
+
+
 const SignInPage = () => {
-  const { login, isLoggingIn, resetFormData, setResetFormData } =
-    useAuthStore();
+  const { login, isLoggingIn, resetFormData, setResetFormData, googleLogin } = useAuthStore();
+
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -23,7 +27,6 @@ const SignInPage = () => {
     if (!formData.password) return toast.error("Password is required");
     if (formData.password.length < 6)
       return toast.error("Password must be at least 6 characters");
-
     return true;
   };
 
@@ -36,6 +39,32 @@ const SignInPage = () => {
       if (success) {
         navigate("/home");
       }
+    }
+  };
+
+  // Google Sign-In Handler
+  //
+  // Flow:
+  // 1. Call googlePopup() to open Firebase Google sign-in popup
+  // 2. User authenticates with their Google account
+  // 3. Firebase returns user object (name, email)
+  // 4. Send user object to googleLogin() store action
+  // 5. Store sends request to /auth/google endpoint
+  // 6. Backend finds existing account by email and logs in user
+  // 7. If successful, redirect to home page
+  //
+  // Note: Same endpoint as signup - backend handles both flows
+  const handleGoogleSignIn = async () => {
+    try {
+      // Open Firebase popup and wait for result
+      const googleUser = await googlePopup(); // user detail from google
+
+      const success = await googleLogin(googleUser);
+      if (success) {
+        navigate("/home");
+      }
+    } catch {
+      toast.error("Google signin failed");
     }
   };
 
@@ -116,11 +145,17 @@ const SignInPage = () => {
           OR
           <div className="flex-1 h-px bg-gray-200" />
         </div>
+
         {/* Google */}
-        <button className="w-full flex items-center justify-center gap-1 rounded-lg border border-gray-300 py-2 text-sm hover:bg-gray-50">
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          className="w-full flex items-center justify-center gap-1 rounded-lg border border-gray-300 py-2 text-sm hover:bg-gray-50"
+        >
           <FcGoogle size={20} />
           Continue with Google
         </button>
+
         <p className="text-center text-sm text-gray-600">
           Create an account?{" "}
           <Link

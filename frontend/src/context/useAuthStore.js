@@ -35,7 +35,6 @@ export const useAuthStore = create((set) => ({
         authUser: res.data,
         isOnline: true, // User is online if the check passes
       });
-      
     } catch (error) {
       console.error("Auth check failed:", error);
       set({ authUser: null, isOnline: false }); // User is offline if check fails
@@ -52,12 +51,11 @@ export const useAuthStore = create((set) => ({
     try {
       const res = await axiosInstance.post("/auth/signup", data);
       set({
-        authUser: res.data,
+        authUser: res.data.user,
         isOnline: true, // User is online after signup
       });
       toast.success("Account created successfully");
       return true;
-
     } catch (error) {
       console.error("Signup error:", error);
       toast.error(error?.response?.data?.message || "Signup failed");
@@ -80,12 +78,10 @@ export const useAuthStore = create((set) => ({
       });
       toast.success("Logged in successfully");
       return true;
-
     } catch (error) {
       console.error("Login error:", error);
       toast.error(error?.response?.data?.message || "Login failed");
       return false;
-
     } finally {
       set({ isLoggingIn: false });
     }
@@ -160,7 +156,6 @@ export const useAuthStore = create((set) => ({
         resetFormData: { email: "", otp: "", newPassword: "" },
       });
       return true;
-
     } catch (error) {
       toast.error(error?.response?.data?.message || "Reset failed");
       return false;
@@ -182,5 +177,30 @@ export const useAuthStore = create((set) => ({
     set({
       resetFormData: { email: "", otp: "", newPassword: "" },
     });
+  },
+
+  // ====================
+  // Google Auth Login/Signup Handler
+  // ====================
+  // This function:
+  // 1. Sends the Google user object to backend (/auth/google endpoint)
+  // 2. Backend checks if user exists by email
+  //    - If exists: logs them in
+  //    - If new: creates account with Google info
+  // 3. Backend returns user data + sets JWT cookie
+  // 4. Frontend stores authUser and marks user as online
+  // 
+  // The backend handles finding/creating the user, so this works for both
+  // signup and signin flows - unified Google auth endpoint
+  googleLogin: async (googleUser) => {
+    try {
+      const res = await axiosInstance.post("/auth/google", googleUser);
+      set({ authUser: res.data, isOnline: true });
+      toast.success("Logged in with Google");
+      return true;
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Google Auth failed");
+      return false;
+    }
   },
 }));

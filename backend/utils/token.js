@@ -3,6 +3,9 @@ import dotenv from 'dotenv';
 dotenv.config(); // Load environment variables from .env file
 
 export const generateToken = (userId,res) => {
+    if (!process.env.JWT_SECRET) {
+        throw new Error('JWT_SECRET is not set in environment');
+    }
 
     // Generate a JWT token for the user
     const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -10,11 +13,11 @@ export const generateToken = (userId,res) => {
     });
 
     res.cookie('jwt_token', token, {
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
-        httpOnly: true,                   // Prevents XXS ATTACK/ client-side JavaScript from accessing the cookie
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+        httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Lax',       // or 'None' if frontend is hosted elsewhere
+        sameSite: 'Lax',
     });
 
-    return token
+    return token;
 }

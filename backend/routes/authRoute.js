@@ -1,5 +1,5 @@
 import express from 'express';
-import { signupUser , signinUser , signoutUser ,authCheck , forgotPassword ,verifyOtp ,resetPassword} from '../controllers/authController.js';
+import { signupUser , signinUser , signoutUser ,authCheck , forgotPassword ,verifyOtp ,resetPassword , googleAuth} from '../controllers/authController.js';
 import { protectRoute } from '../middleware/protectAuth_middleware.js';
  
 
@@ -10,6 +10,12 @@ router.post('/signup', signupUser);
 router.post('/signin' , signinUser);
 router.post('/signout' , protectRoute,  signoutUser);
 
+// Google OAuth Endpoint
+// Unified endpoint that handles both signup and signin
+// Frontend sends: { name, email, phone } from Firebase
+// Backend: Creates account if new user, logs in if exists
+// Returns: User object + JWT cookie
+router.post("/google", googleAuth);
 
 router.post("/forgot-password", forgotPassword);
 router.post("/verify-otp", verifyOtp);
