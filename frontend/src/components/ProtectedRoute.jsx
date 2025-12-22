@@ -6,7 +6,7 @@ const ProtectedRoute = () => {
 
   if (isCheckingAuth) return null;
 
-  return authUser ? <Outlet /> : <Navigate to="/signin" replace />;
+  return authUser ? <Outlet /> : <Navigate to="/signup" replace />;
 };
 
 export default ProtectedRoute;

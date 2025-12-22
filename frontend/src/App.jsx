@@ -39,12 +39,12 @@ function App() {
       <Routes>
         <Route
           path="/signup"
-          element={!authUser ? <SignUpPage /> : <Navigate to="/home" replace />}
+          element={!authUser ? <SignUpPage /> : <Navigate to="/" replace />}
         />
 
         <Route
           path="/signin"
-          element={!authUser ? <SignInPage /> : <Navigate to="/home" replace />}
+          element={!authUser ? <SignInPage /> : <Navigate to="/" replace />}
         />
 
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -53,7 +53,7 @@ function App() {
 
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/home" element={<HomePage />} />
+          <Route path="/" element={<HomePage />} />
         </Route>
       </Routes>
     </>

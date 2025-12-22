@@ -41,7 +41,7 @@ const SignUpPage = () => {
     if (validateForm()) {
       const success = await signup(formData);
       if (success) {
-        navigate("/home");
+        navigate("/");
       }
     }
   };
@@ -63,7 +63,7 @@ const SignUpPage = () => {
 
       const success = await googleLogin(googleUser);
       if (success) {
-        navigate("/home");
+        navigate("/");
       }
     } catch {
       toast.error("Google signup failed");

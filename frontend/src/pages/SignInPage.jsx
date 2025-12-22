@@ -37,7 +37,7 @@ const SignInPage = () => {
 
       const success = await login(formData);
       if (success) {
-        navigate("/home");
+        navigate("/");
       }
     }
   };
@@ -61,7 +61,7 @@ const SignInPage = () => {
 
       const success = await googleLogin(googleUser);
       if (success) {
-        navigate("/home");
+        navigate("/");
       }
     } catch {
       toast.error("Google signin failed");

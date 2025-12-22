@@ -2,12 +2,17 @@ import React from "react";
 import { useAuthStore } from "../context/useAuthStore";
 import { useNavigate } from "react-router-dom";
 
+
+import CustomerPage from "../sub_pages/CustomerPage.jsx";
+import RiderPage from "../sub_pages/RiderPage";
+import OwnerPage from "../sub_pages/OwnerPage";
+
 function HomePage() {
   const { logout, authUser, isCheckingAuth } = useAuthStore();
 
   const navigate = useNavigate();
 
-  console.log(authUser.user)
+  console.log(authUser)
 
   const handleLogout = async () => {
     const ok = await logout();
@@ -38,7 +43,21 @@ function HomePage() {
         </div>
 
         {/* Add any home page content below */}
-        <div className="mt-6 text-gray-700">You are now on the home page.</div>
+        <div className="mt-6 text-gray-700">
+          You are now on the home page.{" "}
+
+            {authUser.role === "Customer"&& (
+              <CustomerPage/>
+            )}
+
+            {authUser.role === "Rider"&& (
+              <RiderPage/>
+            )}
+
+            {authUser.role === "Owner"&& (
+              <OwnerPage/>
+            )}
+        </div>
       </div>
     </div>
   );
