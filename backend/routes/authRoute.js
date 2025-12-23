@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.post('/signup', signupUser);
 router.post('/signin' , signinUser);
-router.post('/signout' , protectRoute,  signoutUser);
+router.post('/signout' ,  signoutUser);
 
 // Google OAuth Endpoint
 // Unified endpoint that handles both signup and signin

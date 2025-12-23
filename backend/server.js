@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 
 import connectDB from "./config/db.js";
 import authRoute from "./routes/authRoute.js";
+import userRoute from "./routes/locationRoute.js";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use(cookieParser()); // Middleware to parse cookies from the request headers
 
 // Routes come after middleware
 app.use("/api/auth", authRoute);
+app.use("/api/location",userRoute);
 
 // if (process.env.NODE_ENV === "production") {
 //   app.use(express.static(path.join(__dirname, "../frontend/dist")));
