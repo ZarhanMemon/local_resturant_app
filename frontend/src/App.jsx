@@ -9,6 +9,7 @@ import SignUpPage from "./pages/SignUpPage.jsx";
 import SignInPage from "./pages/SignInPage.jsx";
 
 import HomePage from "./pages/HomePage.jsx";
+import CreateEditRestaurant from "./components/CreateEditRestaurant.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 import ForgotPassword from "./components/ForgotPassword.jsx";
@@ -54,6 +55,8 @@ function App() {
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<HomePage />} />
+           <Route path="/create-edit-restaurant" element={<CreateEditRestaurant />} />
+
         </Route>
       </Routes>
     </>

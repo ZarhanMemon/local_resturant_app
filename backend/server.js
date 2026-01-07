@@ -8,6 +8,8 @@ import connectDB from "./config/db.js";
 import authRoute from "./routes/authRoute.js";
 import locationRoute from "./routes/locationRoute.js";
 import userRoute from "./routes/userRoute.js";
+import restRouter from "./routes/restaurantRoute.js";
+import itemRouter from "./routes/itemRoute.js";
 
 dotenv.config();
 
@@ -32,6 +34,8 @@ app.use(cookieParser()); // Middleware to parse cookies from the request headers
 // Routes come after middleware
 app.use("/api/auth", authRoute);
 app.use("/api/me",userRoute);
+app.use("/api/restuarant",restRouter)
+app.use("/api/items" , itemRouter);
 
 app.use("/api/location",locationRoute);
 

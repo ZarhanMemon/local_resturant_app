@@ -1,12 +1,14 @@
-import React from 'react'
-import Navbar from '../components/Navbar.jsx'
+import React from "react";
+import Navbar from "../components/Navbar.jsx";
 
 function CustomerPage() {
-  return (<>
-    <div>CustomerPage</div>
-    <Navbar/>
-  </>
-  )
+  return (
+    <>
+      <div>
+        <Navbar />
+      </div>
+    </>
+  );
 }
 
-export default CustomerPage
+export default CustomerPage;

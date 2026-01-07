@@ -1,6 +1,6 @@
 import React from "react";
 import { useAuthStore } from "../context/useAuthStore";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 import CustomerPage from "../sub_pages/CustomerPage.jsx";
 import RiderPage from "../sub_pages/RiderPage";
@@ -24,7 +24,7 @@ function HomePage() {
 
         {authUser.role === "Rider" && <RiderPage />}
 
-        {authUser.role === "Owner" && <OwnerPage />}
+        {authUser.role === "Admin" && <OwnerPage />}
       </div>
     </>
   );
