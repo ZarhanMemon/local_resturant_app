@@ -10,6 +10,7 @@ import SignInPage from "./pages/SignInPage.jsx";
 
 import HomePage from "./pages/HomePage.jsx";
 import CreateEditRestaurant from "./components/CreateEditRestaurant.jsx";
+import AddItems from "./components/AddItems.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 import ForgotPassword from "./components/ForgotPassword.jsx";
@@ -56,7 +57,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<HomePage />} />
            <Route path="/create-edit-restaurant" element={<CreateEditRestaurant />} />
-
+            <Route path="/restaurant/add-item" element={<AddItems />} />      
         </Route>
       </Routes>
     </>

@@ -26,6 +26,9 @@ export const protectRoute = async (req, res, next) => {
             });
         }
 
+        req.userId = decoded.userId; // ✅ THIS IS REQUIRED (match token payload)
+
+
         // Find the user associated with the token
         const user = await User.findById(decoded.userId).select('-password');
         if (!user) {

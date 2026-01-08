@@ -1,40 +1,37 @@
-import {v2 as cloudinary} from 'cloudinary';
-import {config} from 'dotenv';
-config(); // Load environment variables from .env file
+import fs from "fs";
+import { v2 as cloudinary } from "cloudinary";
+import { config } from "dotenv";
 
+config();
 
-
-
-// Configure Cloudinary with your credentials
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-
-// ✅ Upload function
 const uploadOnCloudinary = async (filePath) => {
   try {
     if (!filePath) return null;
 
-    // Upload to cloudinary
     const result = await cloudinary.uploader.upload(filePath, {
-      resource_type: "auto",
+      resource_type: "image",
+      folder: "restaurants",
     });
 
-    // Delete file from local server after upload
-    fs.unlinkSync(filePath);
-
-    return result.secure_url; // ✅ URL to save in DB
+    // Only delete if it's a local file (not a Cloudinary URL)
+    if (filePath && !filePath.startsWith("http") && fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+    return result.secure_url;
   } catch (error) {
-    // Delete file even if upload fails
-    fs.unlinkSync(filePath);
+    if (filePath && !filePath.startsWith("http") && fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
     console.error("Cloudinary upload error:", error);
     return null;
   }
 };
 
+export { cloudinary };
 export default uploadOnCloudinary;
-
-

@@ -22,14 +22,11 @@ export const getUserLocationFromCoords = async (req, res) => {
 
     const feature = response.data.features[0];
 
-    const city =
-      feature.properties.city ||
-      feature.properties.county ||
-      feature.properties.state;
-
     res.status(200).json({
-      city:city || "City",
-      formatted: feature.properties.formatted,
+      city: feature.properties.city || "City",
+      address: feature.properties.formatted, // 👈 THIS is the real address
+      state: feature.properties.state || "State",
+      raw: response.data    
     });
   } catch (error) {
     console.error("Geoapify error:", error.message);
