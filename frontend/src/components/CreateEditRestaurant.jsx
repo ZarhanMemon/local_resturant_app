@@ -13,9 +13,9 @@ const CreateEditRestaurant = () => {
 
   const [form, setForm] = useState({
     name: "",
-    city: localStorage.getItem("city") || "City",
-    state: localStorage.getItem("state") || "State",
-    address: localStorage.getItem("address") || "Address",
+    city:  "",
+    state: "",
+    address: "",
     imageFile: null,
   });
 
@@ -117,7 +117,7 @@ const CreateEditRestaurant = () => {
         </div>
 
         <h2 className="text-center text-xl font-semibold mb-6">
-          {myRestData ? "Edit Shop" : "Add Shop"}
+          {myRestData ? "Edit Restaurant" : "Add Restaurant"}
         </h2>
 
         <form className="space-y-4" onSubmit={handleSubmit}>

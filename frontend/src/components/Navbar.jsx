@@ -85,7 +85,7 @@ const Navbar = ({myRestData}) => {
             {isCustomer && (
               <button className="relative" onClick={() => navigate("/cart")}>
                 <ShoppingCart size={22} />
-                <span className="absolute -right-2 -top-2 text-xs font-bold text-[#ff4d2d] rounded-full px-[6px] py-[1px]">0</span>
+                <span className="absolute -right-2 -top-2 text-xs font-bold text-[#ff4d2d] rounded-full px-1.5 py-px">0</span>
               </button>
             )}
 
@@ -117,7 +117,7 @@ const Navbar = ({myRestData}) => {
                 >
                   <Logs size={16} />
                   <span className="hidden md:inline">My Orders</span>
-                  <span className="absolute -right-2 -top-2 text-xs font-bold text-white rounded-full bg-[#ff4d2d] px-[6px] py-[1px]">0</span>
+                  <span className="absolute -right-2 -top-2 text-xs font-bold text-white rounded-full bg-[#ff4d2d] px-1.5 py-px">0</span>
                 </button>
               </>
             )}

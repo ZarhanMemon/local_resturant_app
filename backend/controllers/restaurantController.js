@@ -5,8 +5,7 @@ export const createEditRest = async (req, res) => {
   try {
     const { name, city, state, address } = req.body;
 
-    console.log("USER ID:", req.userId); // 🔍 debug
-
+ 
     if (!req.userId) {
       return res.status(401).json({
         success: false,
@@ -50,7 +49,7 @@ export const createEditRest = async (req, res) => {
       );
     }
 
-    await rest.populate("owner");
+    await rest.populate("owner items");
 
     return res.status(201).json({
       success: true,
@@ -67,9 +66,11 @@ export const createEditRest = async (req, res) => {
 
 export const getMyRest = async (req, res) => {
   try {
-    const rest = await Restaurant.findOne({ owner: req.userId }).populate(
-      "owner items"
-    );
+    const rest = await Restaurant.findOne({ owner: req.userId })
+    .populate(
+      "owner "
+    ).populate({ path: 'items', options: { sort: { updatedAt: -1 } } });
+
     if (!rest) {
       return null;
     }
