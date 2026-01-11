@@ -1,19 +1,23 @@
 import { create } from "zustand";
 import { axiosInstance } from "../api/axios";
 
-export const useMyRestStore = create((set) => ({
+export const useOwnerStore = create((set) => ({
   myRestData: null,
 
-  getRestaurant: async (data) => {
-    try {
-      const res = await axiosInstance.get("/restuarant/get-my", data);
-      set({
-        myRestData: res.data,
-      });
-    } catch (error) {
-      console.error("myRest data error:", error);
-    }
-  },
+ getRestaurant: async () => {
+  try {
+    const res = await axiosInstance.get("/restuarant/get-my", {
+      withCredentials: true,
+    });
+
+    set({ myRestData: res.data });
+  } catch (error) {
+    console.error(
+      "myRest data error:",
+      error.response?.data || error.message
+    );
+  }
+},
 
   createEditRest: async (formData) => {
     try {
@@ -64,7 +68,7 @@ export const useMyRestStore = create((set) => ({
       }));
       return res.data;
     } catch (error) {
-      console.error("myRest items error:", error);
+      console.error("myRest items error:", error.message);
       return null;
     }
   },

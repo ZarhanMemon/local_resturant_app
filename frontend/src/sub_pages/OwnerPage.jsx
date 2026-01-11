@@ -1,21 +1,20 @@
 import { useEffect } from 'react'
 import Navbar from '../components/Navbar'
-import { useMyRestStore } from '../context/useMyRestStore';
+import { useOwnerStore } from '../context/useOwnerStore';
 import { FaUtensils } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import OwnerItemCard from '../components/ownerItemCard.jsx';
 
 function OwnerPage() {
 
-  const { myRestData, getRestaurant, deleteItem } = useMyRestStore();
+  const { myRestData, getRestaurant, deleteItem } = useOwnerStore();
 
-  console.log("OwnerPage myRestData:", myRestData);
-
+ 
   const navigate = useNavigate();
 
   useEffect(() => {
     getRestaurant();
-  }, []);
+  }, );
 
 
 

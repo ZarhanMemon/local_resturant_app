@@ -49,8 +49,7 @@ export const createEditRest = async (req, res) => {
       );
     }
 
-    await rest.populate("owner items");
-
+ 
     return res.status(201).json({
       success: true,
       message: "Restaurant created/updated successfully",
@@ -66,11 +65,8 @@ export const createEditRest = async (req, res) => {
 
 export const getMyRest = async (req, res) => {
   try {
-    const rest = await Restaurant.findOne({ owner: req.userId })
-    .populate(
-      "owner "
-    ).populate({ path: 'items', options: { sort: { updatedAt: -1 } } });
-
+      const rest = await Restaurant.findOne({ owner: req.userId }).populate('owner items');
+  
     if (!rest) {
       return null;
     }
@@ -79,5 +75,46 @@ export const getMyRest = async (req, res) => {
     return res
       .status(500)
       .json({ message: `get my restaurant error ${error}` });
+  }
+};
+
+
+export const getAllRest = async (req, res) => {
+  try {
+    const rests = await Restaurant.find()
+    return res.status(200).json(rests);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `get all restaurant error ${error}` });
+  }
+};
+
+export const getRestById = async (req, res) => {
+  try {
+    const { name } = req.params;
+    const rest = await Restaurant.findOne({ name })
+     return res.status(200).json(rest);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `get restaurant by id error ${error}` });
+  }
+};
+
+
+export const getRestaurantBycity = async (req, res) => {
+  try {
+    const { city } = req.params;
+    const rests = await Restaurant.find({ city: {$regex:new RegExp(`^${city}` , "i")} }).populate('items');
+ 
+      if(!rests){
+        return res.status(404).json({message: "No restaurants found in this city"})
+      }
+     return res.status(200).json(rests);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `get restaurant by city error ${error}` });
   }
 };

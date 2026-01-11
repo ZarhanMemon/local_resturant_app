@@ -14,6 +14,8 @@ const Navbar = ({myRestData}) => {
   const [showProfile, setShowProfile] = useState(false);
 
 
+
+
   const isCustomer = authUser?.role === "Customer";
   const isOwner = authUser?.role === "Admin" || authUser?.role === "Owner";
 
@@ -24,15 +26,15 @@ const Navbar = ({myRestData}) => {
   };
 
   const [location, setLocation] = useState(
-    localStorage.getItem("location") || "City"
+    isCustomer ? "Fetching location..." : ""
   );
 
+ 
   useEffect(() => {
-    if (isCustomer && !localStorage.getItem("location")) {
+    if (isCustomer) {
       getUserLocation()
         .then((data) => {
           setLocation(data.city);
-          localStorage.setItem("location", data.city);
         })
         .catch(() => setLocation("City"));
     }

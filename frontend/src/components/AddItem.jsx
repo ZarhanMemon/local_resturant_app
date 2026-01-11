@@ -3,12 +3,12 @@ import { FaUtensils } from "react-icons/fa";
 
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { useMyRestStore } from "../context/useMyRestStore.js";
+import { useOwnerStore } from "../context/useOwnerStore.js";
 import { useLocation } from "react-router-dom";
 
 const AddItems = () => {
   const navigate = useNavigate();
-  const { createItem, myRestData, getRestaurant, editItems } = useMyRestStore();
+  const { createItem, myRestData, getRestaurant, editItems } = useOwnerStore();
 
   // editing existing item
   const location = useLocation();
@@ -104,9 +104,7 @@ const AddItems = () => {
       if (isEditMode) {
         await editItems(editItemData._id, formData);
       } else {
-        const result = await createItem(formData);
-        console.log("Item added:", result);
-
+        await createItem(formData);
       }
 
       navigate(-1);

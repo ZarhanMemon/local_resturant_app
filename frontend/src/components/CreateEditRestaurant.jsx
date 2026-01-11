@@ -2,13 +2,13 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { FaUtensils } from "react-icons/fa";
 import { useEffect, useState } from "react";
-import { useMyRestStore } from "../context/useMyRestStore";
+import { useOwnerStore } from "../context/useOwnerStore.js";
 import { useAuthStore } from "../context/useAuthStore";
 import { getUserLocation } from "../libs/getUserLocation";
 
 const CreateEditRestaurant = () => {
   const navigate = useNavigate();
-  const { myRestData, createEditRest } = useMyRestStore();
+  const { myRestData, createEditRest } = useOwnerStore();
   const { user } = useAuthStore();
 
   const [form, setForm] = useState({

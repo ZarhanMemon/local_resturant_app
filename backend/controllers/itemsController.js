@@ -11,7 +11,7 @@ export const addItem = async (req, res) => {
       image = await uploadOnCloudinary(req.file.path);
     }
 
-    const rest = await Restaurant.findOne({owner:req.userId}).populate('items');
+    const rest = await Restaurant.findOne({owner:req.userId})
     if(!rest){
         return res.status(400).json({message:"restaurant not founded"})
     }
@@ -23,11 +23,7 @@ export const addItem = async (req, res) => {
     // add item to restaurant's items array
     rest.items.push(item._id);
     await rest.save();
-    await rest.populate(' owner')
-    await rest.populate({
-      path: 'items',
-      options: { sort: { updatedAt: -1 } }
-    });
+    
 
     return res.status(201).json(rest)
   } catch (error) {
@@ -47,11 +43,8 @@ export const editItem = async (req, res) => {
     }
 
     // find restaurant of logged-in owner
-    const rest = await Restaurant.findOne({ owner: req.userId })
-    await rest.populate(
-      {path: 'items', 
-      options: { sort: { updatedAt: -1 } } }
-    );
+    const rest = await Restaurant.findOne({ owner: req.userId });
+
     if (!rest) {
       return res.status(400).json({ message: "restaurant not found" });
     }
@@ -130,4 +123,34 @@ export const getItemById = async (req, res) => {
       return res.status(500).json({ message: `getting item by id error: ${error}` });
   }
 };
+
+export const getItemsByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;    
+    const items = await Item.find({ category });
+
+    return res.status(200).json(items);
+  } catch (error) { 
+      return res.status(500).json({ message: `getting items by category error: ${error}` });
+  } 
+};
+
+export const getAllItems = async (req, res) => {
+  try {
+    const items = await Item.find();
+    return res.status(200).json(items);
+  } catch (error) {
+    return res.status(500).json({ message: `getting all items error: ${error}` });
+  }
+};
  
+
+export const getItemByName = async (req, res) => {
+  try {
+    const { name } = req.params;    
+    const items = await Item.find({ name: { $regex: name, $options: 'i' } });
+    return res.status(200).json(items);
+  } catch (error) { 
+      return res.status(500).json({ message: `getting items by name error: ${error}` });
+  }
+};

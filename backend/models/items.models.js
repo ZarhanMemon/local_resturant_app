@@ -68,6 +68,11 @@ const itemSchema = new mongoose.Schema(
       max: 100,
       default: 0,
     },
+
+    rating:{
+      average:{type: Number,default: 0,},
+      count:{type: Number,default: 0,}
+    }
   },
   { timestamps: true }
 );

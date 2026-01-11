@@ -1,4 +1,3 @@
-import React from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
 const OwnerItemCard = ({ item, onClick, onEdit, onDelete }) => {
@@ -23,6 +22,7 @@ const OwnerItemCard = ({ item, onClick, onEdit, onDelete }) => {
         {/* Image */}
         <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 shrink-0">
           <img
+           key={item._id}
             src={item.image || "/fallback-restaurant.jpg"}
             alt={item.name}
             className="w-full h-full object-cover"
