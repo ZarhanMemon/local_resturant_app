@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { Star } from "lucide-react";
-import {FaCartPlus} from "react-icons/fa";
+import { FaCartPlus } from "react-icons/fa";
+import { useCustomerStore } from "../context/useCustomerStore.js";
 
 function ItemCard({ data }) {
 
-  const [qty, setQty] = useState(0);
 
+  const { addToCart, increaseQty, decreaseQty, cartItems } = useCustomerStore();
+
+  const cartItem = cartItems.find((item) => item._id === data?._id);
+  const quantity = cartItem ? cartItem.quantity : 0;
 
   if (!data) return null;
 
@@ -24,6 +28,9 @@ function ItemCard({ data }) {
     finalPrice <= 0 || isNaN(finalPrice)
       ? "Free"
       : `₹${Math.round(finalPrice)}`;
+
+
+  console.log("Cart Items:", cartItems);
 
   return (
     <div className="w-[170px] bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
@@ -96,28 +103,45 @@ function ItemCard({ data }) {
 
           {/* QUANTITY CONTROLS */}
           <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
-            <button
-              onClick={() => setQty(Math.max(0, qty - 1))}
-              className="px-2 py-0.5 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              −
-            </button>
 
-            <span className="px-2 text-xs font-semibold">
-              {qty}
-            </span>
+            {quantity > 0 ? (
+              <>
+                <button
+                  onClick={() => decreaseQty(data._id)}
+                  className="px-2 py-0.5 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  −
+                </button>
 
-            <button
-              onClick={() => setQty(qty + 1)}
-              className="px-2 py-0.5 text-sm text-white bg-red-500 hover:bg-red-600"
-            >
-              +
-            </button>
+                <span className="px-2 text-xs font-semibold">
+                  {quantity}
+                </span>
 
-            <button className="ml-1 mr-2">
-              <FaCartPlus className="text-gray-700 hover:text-red-500" /> 
-            </button>
+                <button
+                  onClick={() => increaseQty(data._id)}
+                  className="px-2 py-0.5 text-sm text-white bg-red-500 hover:bg-red-600"
+                >
+                  +
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => addToCart({
+                  _id: data._id,
+                  name: data.name,
+                  price: finalPrice === "Free" ? 0 : Math.round(finalPrice.replace("₹", "")),
+                  image: data.image,
+                  restaurant: data.restaurant,
+                  foodtype: isVeg ? "veg" : "non-veg",
+                })}
+                className="px-2 py-1"
+              >
+                <FaCartPlus className="text-gray-700 hover:text-red-500" />
+              </button>
+            )}
+
           </div>
+
         </div>
       </div>
     </div>

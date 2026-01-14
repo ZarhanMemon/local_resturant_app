@@ -17,6 +17,9 @@ import ForgotPassword from "./components/ForgotPassword.jsx";
 import VerifyOTP from "./components/VerifyOTP.jsx";
 import ResetPassword from "./components/ResetPassword.jsx";
 
+import CartPage from "./components/CartPage.jsx";
+import CheckOut from "./components/CheckOut.jsx";
+
 import "./App.css";
 
 function App() {
@@ -59,6 +62,13 @@ function App() {
           <Route path="/create-edit-restaurant" element={<CreateEditRestaurant />} />
           <Route path="/restaurant/add-item" element={<AddItems />} />
           <Route path="/restaurant/edit-item/:itemId" element={<AddItems />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckOut />} />
+
+
+
+          {/* Redirect unknown routes to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
 
         </Route>
       </Routes>

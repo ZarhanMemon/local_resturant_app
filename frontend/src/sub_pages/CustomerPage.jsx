@@ -58,7 +58,7 @@ function CustomerPage() {
 
   useEffect(() => {
     if (location) getRestaurantByCity(location);
-  }, [location]);
+  }, [location , getRestaurantByCity]);
 
   return (
     <div className="w-screen min-h-screen bg-[#fff9f6] mt-[90px] pb-10">
