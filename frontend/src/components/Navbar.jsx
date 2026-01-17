@@ -34,7 +34,7 @@ const Navbar = ({myRestData}) => {
     if (isCustomer) {
       getUserLocation()
         .then((data) => {
-          setLocation(data.city);
+          setLocation(data.address.city);
         })
         .catch(() => setLocation("City"));
     }

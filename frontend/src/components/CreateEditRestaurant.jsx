@@ -90,11 +90,12 @@ const CreateEditRestaurant = () => {
   useEffect(() => {
     getUserLocation()
       .then((data) => {
+      
         setForm((f) => ({
           ...f,
-          address: data.address,
-          city: data.city,
-          state: data.state,
+          address: data.address.address,
+          city: data.address.city,
+          state: data.address.state,
         }));
       })
       .catch((err) => {

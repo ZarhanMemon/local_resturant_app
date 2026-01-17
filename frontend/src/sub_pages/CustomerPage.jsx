@@ -51,7 +51,7 @@ function CustomerPage() {
   useEffect(() => {
     if (isCustomer) {
       getUserLocation()
-        .then((data) => setLocation(data.city))
+        .then((data) => setLocation(data.address.city))
         .catch(() => setLocation("City"));
     }
   }, [isCustomer]);
