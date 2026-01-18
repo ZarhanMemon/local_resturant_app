@@ -6,7 +6,9 @@ import { useNavigate } from "react-router-dom";
 
 import { useCustomerStore } from "../context/useCustomerStore";
 import { useAddressStore } from "../context/useAddressStore";
-import { getUserLocation } from "../libs/getUserLocation";
+import { useOrderStore } from "../context/useOrderStore.js";
+
+import { getUserLocation } from "../libs/getUserLocation.js";
 
 import {
   MapContainer,
@@ -19,7 +21,6 @@ import "leaflet/dist/leaflet.css";
 
 
 import axios from "axios";
-
 const GEO_KEY = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
 
@@ -31,7 +32,7 @@ const getAddressByLatLon = async (lat, lon) => {
 };
 
 // 🔁 address → lat,lng
- const getLatLonByAddress = async (address) => {
+const getLatLonByAddress = async (address) => {
   const res = await axios.get(
     `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(address)}&apiKey=${GEO_KEY}`
   );
@@ -59,7 +60,7 @@ function MapUpdater({ location }) {
 function CheckOut() {
   const navigate = useNavigate();
 
-  const { cartItems, getTotalAmount } = useCustomerStore();
+  const { cartItems, getTotalAmount, removeFromCart } = useCustomerStore();
   const { location, address, setLocation, setAddress } = useAddressStore();
 
   const [paymentMethod, setPaymentMethod] = useState("cod");
@@ -69,7 +70,7 @@ function CheckOut() {
   const total = subtotal + deliveryFee;
 
 
-    /* INITIAL GPS LOCATION */
+  /* INITIAL GPS LOCATION */
   const fetchCurrentLocation = async () => {
     try {
       const data = await getUserLocation();
@@ -102,6 +103,24 @@ function CheckOut() {
 
     const addr = await getAddressByLatLon(lat, lng);
     if (addr) setAddress(addr);
+  };
+
+
+  const { placeOrder } = useOrderStore();
+
+  const handlePlaceOrder = async () => {
+     if (!cartItems.length) return alert("Cart is empty");
+
+  const order = await placeOrder({
+    cartItems,
+    paymentMethod,
+    address,
+    location,
+    totalAmount: total,
+  });
+
+  removeFromCart();
+  navigate("/order-done", { state: { order } });
   };
 
   return (
@@ -179,7 +198,7 @@ function CheckOut() {
           </div>
         </div>
 
-       {/* PAYMENT METHOD */}
+        {/* PAYMENT METHOD */}
         <div>
           <h2 className="text-sm font-semibold text-gray-700 mb-2">
             Payment Method
@@ -189,11 +208,10 @@ function CheckOut() {
             <button
               onClick={() => setPaymentMethod("cod")}
               className={`border rounded-lg p-4 text-left transition
-              ${
-                paymentMethod === "cod"
+              ${paymentMethod === "cod"
                   ? "border-red-500 bg-red-50"
                   : "border-gray-200"
-              }`}
+                }`}
             >
               <p className="font-semibold text-sm">Cash on Delivery</p>
               <p className="text-xs text-gray-500">
@@ -204,11 +222,10 @@ function CheckOut() {
             <button
               onClick={() => setPaymentMethod("online")}
               className={`border rounded-lg p-4 text-left transition
-              ${
-                paymentMethod === "online"
+              ${paymentMethod === "online"
                   ? "border-red-500 bg-red-50"
                   : "border-gray-200"
-              }`}
+                }`}
             >
               <p className="font-semibold text-sm">
                 UPI / Credit / Debit Card
@@ -238,7 +255,7 @@ function CheckOut() {
             <span>{subtotal}</span>
           </div>
 
-           <div className="flex justify-between   text-gray-700">
+          <div className="flex justify-between   text-gray-700">
             <span>Delivery Fees</span>
             <span>{deliveryFee == 0 ? "Free" : deliveryFee}</span>
           </div>
@@ -249,7 +266,9 @@ function CheckOut() {
           </div>
         </div>
 
-        <button className="w-full bg-red-500 text-white py-4 rounded-xl font-bold hover:bg-red-600">
+        <button
+          onClick={handlePlaceOrder}
+          className="w-full bg-red-500 text-white py-4 rounded-xl font-bold hover:bg-red-600">
           Place Order
         </button>
       </div>

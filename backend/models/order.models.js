@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-
 // Schema for items within a restaurant order - Cart items
 const restaurantOrderItemSchema = new mongoose.Schema(
   {
@@ -10,10 +9,14 @@ const restaurantOrderItemSchema = new mongoose.Schema(
     },
     quantity: Number,
     price: Number,
+    name: String,
+    image: {
+      type: String,
+      required: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
-
 
 // Schema for each restaurant's order within a customer's order - Multiple restaurants in one order
 const restaurantOrderSchema = new mongoose.Schema(
@@ -27,22 +30,27 @@ const restaurantOrderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    
-    subTotal: {  // subtotal for this restaurant's order items
+
+    name: {
+      type: String,
+      required: true,
+    },
+
+    subTotal: {
+      // subtotal for this restaurant's order items
       type: Number,
       required: true,
     },
 
     restaurantOrderItems: [restaurantOrderItemSchema],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
-
 
 // Main Order Schema
 const orderSchema = new mongoose.Schema(
   {
-    customer: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -60,14 +68,16 @@ const orderSchema = new mongoose.Schema(
       longitude: Number,
     },
 
-    totalAmount: {  // total amount for the entire order = subtotals of all restaurant orders + delivery charges
+    totalAmount: {
+      // total amount for the entire order = subtotals of all restaurant orders + delivery charges
       type: Number,
       required: true,
     },
 
-    restaurantOrder: [restaurantOrderSchema],
+    restaurantOrders: [restaurantOrderSchema],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-export const Order = mongoose.model("Order", orderSchema);
+const Order = mongoose.model("Order", orderSchema);
+export default Order;

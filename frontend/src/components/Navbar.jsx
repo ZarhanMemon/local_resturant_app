@@ -94,7 +94,7 @@ const Navbar = ({myRestData}) => {
             {/* CUSTOMER DESKTOP MY ORDERS */}
             {isCustomer && (
               <button
-                onClick={() => navigate("/orders")}
+                onClick={() => navigate("/my-orders")}
                 className="hidden relative md:block text-sm font-medium bg-orange-100 rounded-xl px-3 py-2 text-orange-500"
               >
                 My Orders
@@ -114,7 +114,7 @@ const Navbar = ({myRestData}) => {
 
 
                 <button
-                  onClick={() => navigate("/orders")}
+                  onClick={() => navigate("/my-orders")}
                   className="flex relative items-center gap-1.5 text-sm font-medium bg-orange-100 rounded-xl px-3 py-2 text-orange-500"
                 >
                   <Logs size={16} />
@@ -145,7 +145,7 @@ const Navbar = ({myRestData}) => {
 
                   {isCustomer && (
                     <button
-                      onClick={() => navigate("/orders")}
+                      onClick={() => navigate("/my-orders")}
                       className="md:hidden w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
                     >
                       My Orders

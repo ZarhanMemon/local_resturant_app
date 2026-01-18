@@ -11,6 +11,7 @@ import SignInPage from "./pages/SignInPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import CreateEditRestaurant from "./components/CreateEditRestaurant.jsx";
 import AddItems from "./components/AddItem.jsx";
+
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 import ForgotPassword from "./components/ForgotPassword.jsx";
@@ -19,6 +20,9 @@ import ResetPassword from "./components/ResetPassword.jsx";
 
 import CartPage from "./components/CartPage.jsx";
 import CheckOut from "./components/CheckOut.jsx";
+import OrderDone from "./components/OrderDone.jsx";
+import MyOrders from "./components/MyOrders.jsx";
+
 
 import "./App.css";
 
@@ -64,6 +68,8 @@ function App() {
           <Route path="/restaurant/edit-item/:itemId" element={<AddItems />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckOut />} />
+          <Route path="/order-done" element={<OrderDone/>}/>
+          <Route path="/my-orders" element={<MyOrders/>} />
 
 
 

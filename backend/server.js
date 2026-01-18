@@ -10,6 +10,7 @@ import locationRoute from "./routes/locationRoute.js";
 import userRoute from "./routes/userRoute.js";
 import restRouter from "./routes/restaurantRoute.js";
 import itemRouter from "./routes/itemRoute.js";
+import orderRouter from "./routes/orderRoute.js";
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/me",userRoute);
 app.use("/api/restuarant",restRouter)
 app.use("/api/items" , itemRouter);
+app.use("/api/order" , orderRouter)
 
 app.use("/api/location",locationRoute);
 
