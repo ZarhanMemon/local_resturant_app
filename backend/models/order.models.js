@@ -43,6 +43,12 @@ const restaurantOrderSchema = new mongoose.Schema(
     },
 
     restaurantOrderItems: [restaurantOrderItemSchema],
+
+    status:{
+      type:String,
+      enum:["pending" , "accepted" , "preparing" ,"completed","cancelled"],
+      default:"pending"
+    }
   },
   { timestamps: true },
 );

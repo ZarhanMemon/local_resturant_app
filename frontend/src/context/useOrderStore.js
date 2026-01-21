@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../api/axios.js";
 
-export const useOrderStore = create((set) => ({
+export const useOrderStore = create((set,get) => ({
   orders: [],
   loading: false,
   error: null,
@@ -25,12 +25,13 @@ export const useOrderStore = create((set) => ({
             name: item.name,
             price: item.price,
             quantity: item.quantity,
-            image : item.image,
+            image: item.image,
+            restaurant: item.restaurant,
           })),
           totalAmount,
           paymentMethod,
           deliveryAddress: {
-            text: address,
+            address: address,
             latitude: location?.lat,
             longitude: location?.lng,
           },
@@ -72,13 +73,19 @@ export const useOrderStore = create((set) => ({
     }
   },
 
+  updateOrderStatus: async (orderId, restaurantOrderId, status) => {
+    await axiosInstance.put("order/update-status", {
+      orderId,
+      restaurantOrderId,
+      status,
+    });
+
+    get().fetchMyOrders(); // refresh list
+  },
+
   /* ---------------- CLEAR ORDERS (LOGOUT) ---------------- */
   clearOrders: () => set({ orders: [] }),
 }));
-
-
-
-
 
 // Cart → Checkout
 //       ↓

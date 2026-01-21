@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../context/useAuthStore";
 import { useCustomerStore } from "../context/useCustomerStore.js";
 import { getUserLocation } from "../libs/getUserLocation";
+import { useOrderStore } from "../context/useOrderStore.js";
 
 const Navbar = ({myRestData}) => {
 
@@ -15,6 +16,7 @@ const Navbar = ({myRestData}) => {
   const [showProfile, setShowProfile] = useState(false);
 
   const { cartItems } = useCustomerStore(); // Get cart items from the store
+  const { orders } = useOrderStore()
 
   const isCustomer = authUser?.role === "Customer";
   const isOwner = authUser?.role === "Admin" || authUser?.role === "Owner";
@@ -119,7 +121,7 @@ const Navbar = ({myRestData}) => {
                 >
                   <Logs size={16} />
                   <span className="hidden md:inline">My Orders</span>
-                  <span className="absolute -right-2 -top-2 text-xs font-bold text-white rounded-full bg-[#ff4d2d] px-1.5 py-px">0</span>
+                  <span className="absolute -right-2 -top-2 text-xs font-bold text-white rounded-full bg-[#ff4d2d] px-1.5 py-px">{orders.length}</span>
                 </button>
               </>
             )}
