@@ -1,32 +1,37 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useOrderStore } from "../context/useOrderStore";
 import { useAuthStore } from "../context/useAuthStore";
 
 function MyOrders() {
-
-  const { authUser } = useAuthStore();
-  const { orders, fetchMyOrders, updateOrderStatus} = useOrderStore();
-
-
   const navigate = useNavigate();
+  const { authUser } = useAuthStore();
+  const {
+    orders,
+    freeRiders,
+    fetchMyOrders,
+    updateOrderStatus,
+  } = useOrderStore();
+
+  const [updatingOrderId, setUpdatingOrderId] = useState(null);
+
+  const isCustomer = authUser?.role === "Customer";
+  const isOwner = authUser?.role === "Admin" || authUser?.role === "Owner";
 
   useEffect(() => {
     fetchMyOrders();
   }, []);
 
-  const isCustomer = authUser?.role === "Customer";
-  const isOwner = authUser?.role === "Admin" || authUser?.role === "Owner";
+  const handleStatusChange = async (orderId, restOrderId, status) => {
+    setUpdatingOrderId(restOrderId);
+    await updateOrderStatus(orderId, restOrderId, status);
+    setUpdatingOrderId(null);
+  };
 
-  if (orders.lenght == 0) {
-    return (
-      <div>
-        No orders
-      </div>
-    )
+  if (!orders || orders.length === 0) {
+    return <div className="pt-24 text-center">No orders found</div>;
   }
-
 
   return (
     <div className="min-h-screen bg-[#fff9f6] pt-20 px-4">
@@ -40,20 +45,19 @@ function MyOrders() {
         </h1>
       </div>
 
+      {/* ================= CUSTOMER VIEW ================= */}
       {isCustomer &&
         orders.map((order) => (
           <div
             key={order._id}
             className="bg-white rounded-xl shadow mb-6 p-4"
           >
-            {/* Order Header */}
             <div className="flex justify-between text-sm text-gray-600">
               <div>
                 <p className="font-semibold text-black">
                   Order #{order._id.slice(-6)}
                 </p>
                 <p>
-                  Date:{" "}
                   {new Date(order.createdAt).toLocaleDateString()}
                 </p>
               </div>
@@ -66,104 +70,81 @@ function MyOrders() {
 
             <hr className="my-3" />
 
-            {/* Restaurant Orders */}
             {order.restaurantOrders.map((restOrder) => (
               <div key={restOrder._id} className="mb-4">
-                {/* Restaurant Name */}
                 <h3 className="font-semibold mb-2">
-                  {restOrder.name}
+                  {restOrder.restaurant?.name}
                 </h3>
 
-                {/* Items */}
                 <div className="flex gap-3 overflow-x-auto">
                   {restOrder.restaurantOrderItems.map((item) => (
                     <div
                       key={item._id}
-                      className="border rounded-lg p-2 min-w-[120px] max-w-[120px]"
+                      className="border rounded-lg p-2 min-w-[120px]"
                     >
                       <img
                         src={item.image}
                         alt={item.name}
-                        className="w-full h-20 object-cover rounded-md mb-1"
+                        className="w-full h-20 object-cover rounded-md"
                       />
-
-                      <p className="text-sm font-medium truncate">
-                        {item.name}
-                      </p>
-
+                      <p className="text-sm truncate">{item.name}</p>
                       <p className="text-xs text-gray-500">
-                        Qty: {item.quantity} × ₹{item.price}
+                        Qty {item.quantity} × ₹{item.price}
                       </p>
                     </div>
                   ))}
                 </div>
 
-                {/* Subtotal */}
                 <div className="flex justify-between mt-2 text-sm">
-                  <span className="font-medium">
-                    Subtotal: ₹{restOrder.subTotal}
+                  <span>Subtotal: ₹{restOrder.subTotal}</span>
+                  <span className="text-blue-500">
+                    {restOrder.status}
                   </span>
-                  <span className="text-blue-500">pending</span>
                 </div>
 
                 <hr className="mt-3" />
               </div>
             ))}
 
-            {/* Order Footer */}
-            <div className="flex justify-between items-center mt-3">
-              <p className="font-bold">
-                Total: ₹{order.totalAmount}
-              </p>
-
+            <div className="flex justify-between items-center">
+              <p className="font-bold">₹{order.totalAmount}</p>
               <button className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm">
                 Track Order
               </button>
             </div>
           </div>
-        ))
-      }
+        ))}
 
-      {/* ================= OWNER ORDERS ================= */}
+      {/* ================= OWNER VIEW ================= */}
       {isOwner &&
-        orders?.map((order) =>
+        orders.map((order) =>
           order.restaurantOrders.map((restOrder) => (
             <div
               key={restOrder._id}
               className="bg-white rounded-xl shadow mb-6 p-4"
             >
-              {/* CUSTOMER DETAILS */}
-              <div className="flex justify-between">
-
-                <div className="mb-3">
-                  <h2 className="font-semibold text-gray-800">
+              {/* Customer Info */}
+              <div className="flex justify-between mb-2">
+                <div>
+                  <p className="font-semibold">
                     {order.user?.name}
-                  </h2>
-
+                  </p>
                   <p className="text-sm text-gray-500">
                     {order.user?.email}
                   </p>
-
-                  {order.user?.phone &&
-                    <p className="text-sm text-gray-500">
-                      📞 {order.user?.phone}
-                    </p>
-                  }
-
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-gray-400">
                     {order.deliveryAddress?.address}
                   </p>
                 </div>
 
-                <span className="text-blue-300">{restOrder.status}</span>
-
+                <span className="text-blue-400 text-sm">
+                  {restOrder.status}
+                </span>
               </div>
-
-
 
               <hr className="my-3" />
 
-              {/* ITEMS */}
+              {/* Items */}
               <div className="flex gap-3 overflow-x-auto">
                 {restOrder.restaurantOrderItems.map((item) => (
                   <div
@@ -173,15 +154,11 @@ function MyOrders() {
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-full h-20 object-cover rounded-md mb-1"
+                      className="w-full h-20 object-cover rounded-md"
                     />
-
-                    <p className="text-sm font-medium truncate">
-                      {item.name}
-                    </p>
-
+                    <p className="text-sm truncate">{item.name}</p>
                     <p className="text-xs text-gray-500">
-                      Qty: {item.quantity} × ₹{item.price}
+                      Qty {item.quantity} × ₹{item.price}
                     </p>
                   </div>
                 ))}
@@ -189,42 +166,75 @@ function MyOrders() {
 
               <hr className="my-3" />
 
-              {/* FOOTER */}
-              <div className="flex justify-between items-center">
-                {/* STATUS */}
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">Status:</span>
+              {/* Footer */}
+              <div className="flex flex-col gap-3">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">Status:</span>
+                    <select
+                      value={restOrder.status}
+                      disabled={updatingOrderId === restOrder._id}
+                      onChange={(e) =>
+                        handleStatusChange(
+                          order._id,
+                          restOrder._id,
+                          e.target.value
+                        )
+                      }
+                      className="border rounded px-2 py-1 text-sm text-orange-500"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="preparing">Preparing</option>
+                      <option value="out of delivery">
+                        Out of delivery
+                      </option>
+                      <option value="delivered">Delivered</option>
+                    </select>
+                  </div>
 
-                  <select
-                    value={restOrder.status}
-                    onChange={(e) =>
-                      updateOrderStatus(
-                        order._id,
-                        restOrder._id,
-                        e.target.value
-                      )
-                    }
-                    className="border rounded-md px-2 py-1 text-sm text-orange-500"
-                  >
-
-                    <option value="pending">Pending</option>
-                    <option value="accepted">Accepted</option>
-                    <option value="preparing">Preparing</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
+                  <p className="font-semibold">
+                    ₹{restOrder.subTotal}
+                  </p>
                 </div>
 
-                {/* TOTAL */}
-                <p className="font-semibold text-gray-800">
-                  Total: ₹{restOrder.subTotal}
-                </p>
+                {/* ================= FREE RIDERS UI ================= */}
+                {restOrder.status === "out of delivery" &&
+                  freeRiders?.length > 0 && (
+                    <div className="border-t pt-4">
+                      <h3 className="text-sm font-semibold mb-3">
+                        🛵 Available Riders
+                      </h3>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {freeRiders.map((rider) => (
+                          <div
+                            key={rider.id}
+                            className="flex justify-between items-center bg-orange-50 border border-orange-200 rounded-lg p-3"
+                          >
+                            <div>
+                              <p className="font-medium">
+                                {rider.name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                📞 {rider.phone}
+                              </p>
+                              <p className="text-xs text-gray-500 truncate max-w-[180px]">
+                                ✉️ {rider.email}
+                              </p>
+                            </div>
+
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                              Free
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
               </div>
             </div>
-          ))
+          )),
         )}
-
-
     </div>
   );
 }

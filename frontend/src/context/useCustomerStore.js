@@ -73,6 +73,11 @@ export const useCustomerStore = create((set,get) => ({
     }));
   },
 
+  //delete cART AFTER WE place the order
+  deleteCartItems: ()=>{
+    set({cartItems:[]})
+  },
+
   // 🧾 GET TOTAL AMOUNT
   getTotalAmount: () => {
     const cartItems = get().cartItems;

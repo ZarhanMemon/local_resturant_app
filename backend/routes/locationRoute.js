@@ -1,9 +1,10 @@
 import express from 'express';
-import { getUserLocationFromCoords } from '../controllers/locationController.js';
- 
+import { getUserLocationFromCoords, updateUserLocation } from '../controllers/locationController.js';
+import {protectRoute} from "../middleware/protectAuth_middleware.js";
 
 const router = express.Router();
 
-router.get('/reverse', getUserLocationFromCoords);
+router.get('/reverse',protectRoute, getUserLocationFromCoords);
+router.post('/update-location' , protectRoute , updateUserLocation)
 
 export default router;

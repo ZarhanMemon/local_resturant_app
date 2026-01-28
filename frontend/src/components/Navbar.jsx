@@ -20,6 +20,7 @@ const Navbar = ({myRestData}) => {
 
   const isCustomer = authUser?.role === "Customer";
   const isOwner = authUser?.role === "Admin" || authUser?.role === "Owner";
+  const isRider = authUser?.role === "Rider";
 
   const handleLogout = () => {
     logout();
@@ -124,6 +125,18 @@ const Navbar = ({myRestData}) => {
                   <span className="absolute -right-2 -top-2 text-xs font-bold text-white rounded-full bg-[#ff4d2d] px-1.5 py-px">{orders.length}</span>
                 </button>
               </>
+            )}
+
+            {/* Rider */}
+            {isRider && (
+                <button
+                  onClick={() => navigate("/my-orders")}
+                  className="flex relative items-center gap-1.5 text-sm font-medium bg-orange-100 rounded-xl px-3 py-2 text-orange-500"
+                >
+                  <Logs size={16} />
+                  <span className="hidden md:inline">My Orders</span>
+                  <span className="absolute -right-2 -top-2 text-xs font-bold text-white rounded-full bg-[#ff4d2d] px-1.5 py-px">{orders.length}</span>
+                </button>
             )}
 
             {/* PROFILE (COMMON) */}

@@ -12,6 +12,7 @@ function CartPage() {
         decreaseQty,
         removeFromCart,
          getTotalAmount,
+        //  deleteCartItems
     } = useCustomerStore();
 
  
@@ -127,7 +128,9 @@ function CartPage() {
                         <button
                             className=" mt-4 p-4 bg-red-500  text-white py-3 rounded-lg
                                  font-semibold hover:bg-red-600 transition"
-                                 onClick={()=>navigate('/checkout')}
+                                 onClick={()=>{
+                                    navigate('/checkout')
+                                }}
                         >
                             Proceed to Checkout
                         </button>

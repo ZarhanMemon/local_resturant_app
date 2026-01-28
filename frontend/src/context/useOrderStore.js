@@ -1,8 +1,14 @@
 import { create } from "zustand";
 import { axiosInstance } from "../api/axios.js";
+ 
 
-export const useOrderStore = create((set,get) => ({
+export const useOrderStore = create((set) => ({
   orders: [],
+
+  freeRiders: [],
+
+  assignment:[],
+
   loading: false,
   error: null,
 
@@ -31,7 +37,7 @@ export const useOrderStore = create((set,get) => ({
           totalAmount,
           paymentMethod,
           deliveryAddress: {
-            address: address,
+            address,
             latitude: location?.lat,
             longitude: location?.lng,
           },
@@ -73,26 +79,60 @@ export const useOrderStore = create((set,get) => ({
     }
   },
 
-  updateOrderStatus: async (orderId, restaurantOrderId, status) => {
-    await axiosInstance.put("order/update-status", {
-      orderId,
-      restaurantOrderId,
-      status,
-    });
+  /* ---------------- UPDATE ORDER STATUS ---------------- */
+updateOrderStatus: async (orderId, restaurantOrderId, status) => {
+  try {
+    const res = await axiosInstance.put(
+      "/order/update-status",
+      { orderId, restaurantOrderId, status },
+      { withCredentials: true }
+    );
 
-    get().fetchMyOrders(); // refresh list
-  },
+    const { restaurantOrder, freeRiders } = res.data;
+
+    set((state) => ({
+      orders: state.orders.map((order) =>
+        order._id === orderId
+          ? {
+              ...order,
+              restaurantOrders: order.restaurantOrders.map((ro) =>
+                ro._id === restaurantOrder._id ? restaurantOrder : ro
+              ),
+            }
+          : order
+      ),
+      freeRiders: freeRiders || [],
+      loading : false
+    }));
+
+    return res.data;
+  } catch (err) {
+    set({
+      error: err.response?.data?.message || "Failed to update order status",
+      loading:true
+    });
+  }
+},
+
+
+getDeliveryRiderAssignment : async () => {
+  try {
+     const res = await axiosInstance.get(
+      "/order/get-assignment",
+       { withCredentials: true }
+    );
+
+    set({ assignment: res.data, loading: false });
+
+  } catch (err) {
+     set({
+        error: err.response?.data?.message || "Failed to fetch orders",
+        loading: false,
+      });
+      throw err;
+  }
+},
 
   /* ---------------- CLEAR ORDERS (LOGOUT) ---------------- */
   clearOrders: () => set({ orders: [] }),
 }));
-
-// Cart → Checkout
-//       ↓
-// placeOrder() → order.controller.js
-//       ↓
-// MongoDB
-//       ↓
-// OrderDone.jsx
-//       ↓
-// MyOrders.jsx

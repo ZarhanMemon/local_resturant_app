@@ -46,9 +46,22 @@ const restaurantOrderSchema = new mongoose.Schema(
 
     status:{
       type:String,
-      enum:["pending" , "accepted" , "preparing" ,"completed","cancelled"],
+      enum:["pending" , "preparing" ,"delivered","out of delivery"],
       default:"pending"
-    }
+    },
+
+    assignment:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref:"DeliveryAssignment",
+      default:null
+    },
+
+    assignedDeliveryRider :{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"User",
+      }
+    
+    
   },
   { timestamps: true },
 );

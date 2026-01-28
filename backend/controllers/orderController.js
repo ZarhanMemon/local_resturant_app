@@ -1,3 +1,4 @@
+import DeliveryAssignment from "../models/deliveryAssignment.models.js";
 import Order from "../models/order.models.js";
 import Restaurant from "../models/restaurant.models.js";
 import User from "../models/users.models.js";
@@ -7,7 +8,6 @@ export const placeOrder = async (req, res) => {
   try {
     const { cartItems, paymentMethod, deliveryAddress, totalAmount } = req.body;
 
-    /* ---------- VALIDATIONS ---------- */
     if (!cartItems || cartItems.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
@@ -22,35 +22,23 @@ export const placeOrder = async (req, res) => {
         .json({ message: "Send complete delivery address" });
     }
 
-    /* ---------- GROUP ITEMS BY RESTAURANT ---------- */
     const groupedItems = {};
 
     cartItems.forEach((item) => {
-      const restaurantId = item.restaurant;
+      if (!item.restaurant) return;
 
-      if (!restaurantId) {
-        return res.status(400).json({
-          message: "Cart item missing restaurant id",
-          item,
-        });
+      if (!groupedItems[item.restaurant]) {
+        groupedItems[item.restaurant] = [];
       }
-
-      if (!groupedItems[restaurantId]) {
-        groupedItems[restaurantId] = [];
-      }
-      groupedItems[restaurantId].push(item);
+      groupedItems[item.restaurant].push(item);
     });
 
-    /* ---------- CREATE RESTAURANT ORDERS ---------- */
     const restaurantOrders = await Promise.all(
       Object.keys(groupedItems).map(async (restaurantId) => {
-
         const restaurant =
           await Restaurant.findById(restaurantId).populate("owner");
 
-        if (!restaurant) {
-          throw new Error("Restaurant not found");
-        }
+        if (!restaurant) throw new Error("Restaurant not found");
 
         const items = groupedItems[restaurantId];
 
@@ -64,7 +52,7 @@ export const placeOrder = async (req, res) => {
           name: restaurant.name,
           owner: restaurant.owner._id,
           subTotal,
-          status:"pending",
+          status: "pending",
           restaurantOrderItems: items.map((i) => ({
             item: i._id,
             name: i.name,
@@ -76,7 +64,6 @@ export const placeOrder = async (req, res) => {
       }),
     );
 
-    /* ---------- CREATE FINAL ORDER ---------- */
     const newOrder = await Order.create({
       user: req.userId,
       paymentMethod,
@@ -87,84 +74,211 @@ export const placeOrder = async (req, res) => {
 
     res.status(201).json(newOrder);
   } catch (error) {
-    console.error("PLACE ORDER ERROR:", error);
-    res.status(500).json({
-      message: "Place order failed",
-      error: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
 /* ================= GET MY ORDERS ================= */
 export const getMyOrders = async (req, res) => {
   try {
-    const user = await User.findById(req.userId || req.user._id);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    const user = await User.findById(req.userId);
 
     let orders = [];
 
     if (user.role === "Customer") {
-      orders = await Order.find({ user: req.userId }).sort({
-        createdAt: -1,
-      });
-    } else if (user.role === "Admin" || user.role === "Owner") {
-
-      orders = await Order.find({
-        "restaurantOrders.owner": req.userId,
-      }).populate("user" ,"name phone email").sort({ createdAt: -1 });
+      orders = await Order.find({ user: req.userId }).sort({ createdAt: -1 });
+    } else {
+      orders = await Order.find({ "restaurantOrders.owner": req.userId })
+        .populate("user", "name phone email")
+        .sort({ createdAt: -1 });
     }
 
-    res.status(200).json(orders);
+    // 🔄 Dynamic recalculation of free riders
+    for (const order of orders) {
+      for (const restOrder of order.restaurantOrders) {
+        if (restOrder.status === "out of delivery" && !restOrder.assignment) {
+          const { longitude, latitude } = order.deliveryAddress;
+
+          const nearByRiders = await User.find({
+            role: "Rider",
+            location: {
+              $near: {
+                $geometry: {
+                  type: "Point",
+                  coordinates: [Number(longitude), Number(latitude)],
+                },
+                $maxDistance: 5000, // 5km radius
+              },
+            },
+          });
+
+          if (nearByRiders.length) {
+            const nearByIds = nearByRiders.map((r) => r._id);
+
+            const busyRiders = await DeliveryAssignment.find({
+              assignedTo: { $in: nearByIds },
+              status: { $in: ["assigned"] },
+            }).distinct("assignedTo");
+
+            const busySet = new Set(busyRiders.map(String));
+
+            const freeRiders = nearByRiders.filter(
+              (r) => !busySet.has(String(r._id)),
+            );
+
+            restOrder.freeRiders = freeRiders.map((r) => ({
+              id: r._id,
+              name: r.name,
+              phone: r.phone,
+              email: r.email,
+              longitude: r.location.coordinates[0],
+              latitude: r.location.coordinates[1],
+            }));
+          } else {
+            restOrder.freeRiders = [];
+          }
+        }
+      }
+    }
+
+    res.json(orders);
   } catch (error) {
-    console.error("GET ORDERS ERROR:", error);
-    res.status(500).json({ message: "Failed to fetch orders" });
+    console.error("GET MY ORDERS ERROR:", error);
+    res.status(500).json({ message: error.message });
   }
 };
 
-/*============== Update the STATUS ============*/ 
+/* ================= UPDATE ORDER STATUS ================= */
 export const updateOrderStatus = async (req, res) => {
   try {
     const { orderId, restaurantOrderId, status } = req.body;
 
     if (!orderId || !restaurantOrderId || !status) {
-      return res.status(400).json({
-        message: "orderId, restaurantOrderId and status are required",
-      });
+      return res.status(400).json({ message: "Missing fields" });
     }
 
-    // Find order
     const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ message: "Order not found" });
 
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-
-    // Find restaurant order
     const restaurantOrder = order.restaurantOrders.id(restaurantOrderId);
+    if (!restaurantOrder)
+      return res.status(404).json({ message: "Restaurant order not found" });
 
-    if (!restaurantOrder) {
-      return res
-        .status(404)
-        .json({ message: "Restaurant order not found" });
-    }
-
-    // ✅ Update status
+    //  update status
     restaurantOrder.status = status;
+
+    let freeRidersPayload = [];
+
+    //  Only assign rider when order is READY
+    if (status === "out of delivery" && !restaurantOrder.assignment) {
+      const { longitude, latitude } = order.deliveryAddress;
+
+      const nearByRiders = await User.find({
+        role: "Rider",
+        location: {
+          $near: {
+            $geometry: {
+              type: "Point",
+              coordinates: [Number(longitude), Number(latitude)],
+            },
+            $maxDistance: 5000,
+          },
+        },
+      });
+
+      const nearByIds = nearByRiders.map((r) => r._id);
+
+      const busyRiders = await DeliveryAssignment.find({
+        assignedTo: { $in: nearByIds },
+        status: { $in: ["assigned", "broadcasted"] },
+      }).distinct("assignedTo");
+
+      const busySet = new Set(busyRiders.map(String));
+
+      const freeRiders = nearByRiders.filter(
+        (r) => !busySet.has(String(r._id)),
+      );
+
+      if (freeRiders.length == 0) {
+        await order.save();
+        return res.json({
+          message: "Order updated, all riders busy",
+        });
+      }
+
+      //  Create ONE delivery_assignment (broadcast logic later)
+      const delivery_assignment = await DeliveryAssignment.create({
+        order: order._id,
+        restaurant: restaurantOrder.restaurant,
+        restaurantOrderId: restaurantOrder._id,
+        broadcastedTo: freeRiders,
+        status: "broadcasted",
+      });
+
+      restaurantOrder.assignedDeliveryRider = delivery_assignment.assignedTo;
+      restaurantOrder.delivery_assignment = delivery_assignment._id;
+
+      freeRidersPayload = freeRiders.map((r) => ({
+        id: r._id,
+        name: r.name,
+        longitude: r.location.coordinates[0],
+        latitude: r.location.coordinates[1],
+        phone: r.phone,
+        email: r.email,
+      }));
+    }
 
     await order.save();
 
+    await order.populate("restaurantOrders.restaurant", "name");
+    await order.populate(
+      "restaurantOrders.assignedDeliveryRider",
+      "name email phone",
+    );
+
+    const updatedRestOrder = order.restaurantOrders.find(
+      (o) => String(o._id) === String(restaurantOrderId),
+    );
+
+    console.log(updatedRestOrder);
+
     return res.json({
-      message: "Order status updated successfully",
-      updatedOrder: restaurantOrder,
+      message: "Order status updated",
+      restaurantOrder: updatedRestOrder,
+      assignedDeliveryRider: updatedRestOrder.assignedDeliveryRider,
+      freeRiders: freeRidersPayload,
+      delivery_assignment: updatedRestOrder.delivery_assignment._id,
     });
   } catch (error) {
     console.error("UPDATE STATUS ERROR:", error);
-    return res.status(500).json({
-      message: "Failed to update order status",
-      error: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 };
+
+
+/*================Get the order_assignment for rider to accept ===============*/
+export const getDeliveryRiderAssignment = async (req,res) =>{
+  try {
+    
+    const deliveryBoyId = req.userId;
+
+    const assignments = await DeliveryAssignment.find({
+      broadcastedTo: deliveryBoyId,
+      status:"broadcasted"
+    }).populate("order").populate("restaurant")
+
+    const formated = assignments.map(a =>({
+        assignmentId : a._id,
+        orderId : a.order._id,
+        restName : a.restaurant.name,
+        deliveryAddress : a.order.deliveryAddress,
+        items : a.order.restaurantOrders.find( so => so._id.equals(a.restaurantOrderId))?.restaurantOrderItems || [],
+        subTotal : a.order.restaurantOrders.find( so => so._id.equals(a.restaurantOrderId))?.subTotal ,
+    }))
+
+    return res.status(200).json(formated)
+  } catch (error) {
+    console.error("get delivery assignment ERROR:", error);
+    res.status(500).json({ message: error.message });
+  }
+}
