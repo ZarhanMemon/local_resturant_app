@@ -8,16 +8,15 @@ function RiderPage() {
 
   const { authUser } = useAuthStore();
 
-  const { getDeliveryRiderAssignment , assignment } = useOrderStore()
+  const { getDeliveryRiderAssignment , assignment , acceptAssignment} = useOrderStore()
 
   useEffect(() => {
     if (authUser?.role === "Rider") {
       startTrackingUserLocation();
       getDeliveryRiderAssignment()
     }
-  }, [authUser]);
+  }, []);
 
-  console.log(assignment)
   
   return (
     <>
@@ -61,7 +60,9 @@ function RiderPage() {
                     {order.deliveryAddress.address}
                   </p>
 
-                  <button className="mt-2 w-full bg-orange-500 text-white text-sm py-1.5 rounded-md">
+                  <button
+                  onClick= {()=>acceptAssignment(order.assignmentId)}
+                  className="mt-2 w-full bg-orange-500 text-white text-sm py-1.5 rounded-md">
                     Accept Order
                   </button>
                 </div>

@@ -59,6 +59,7 @@ const restaurantOrderSchema = new mongoose.Schema(
     assignedDeliveryRider :{
         type: mongoose.Schema.Types.ObjectId,
         ref:"User",
+        default:null
       }
     
     

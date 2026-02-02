@@ -1,13 +1,13 @@
 import { create } from "zustand";
 import { axiosInstance } from "../api/axios.js";
- 
 
 export const useOrderStore = create((set) => ({
   orders: [],
 
   freeRiders: [],
 
-  assignment:[],
+  assignment: [],
+  currentOrder: null,
 
   loading: false,
   error: null,
@@ -80,59 +80,100 @@ export const useOrderStore = create((set) => ({
   },
 
   /* ---------------- UPDATE ORDER STATUS ---------------- */
-updateOrderStatus: async (orderId, restaurantOrderId, status) => {
-  try {
-    const res = await axiosInstance.put(
-      "/order/update-status",
-      { orderId, restaurantOrderId, status },
-      { withCredentials: true }
-    );
+  updateOrderStatus: async (orderId, restaurantOrderId, status) => {
+    try {
+      const res = await axiosInstance.put(
+        "/order/update-status",
+        { orderId, restaurantOrderId, status },
+        { withCredentials: true },
+      );
 
-    const { restaurantOrder, freeRiders } = res.data;
+      const { restaurantOrder, freeRiders } = res.data;
 
-    set((state) => ({
-      orders: state.orders.map((order) =>
-        order._id === orderId
-          ? {
-              ...order,
-              restaurantOrders: order.restaurantOrders.map((ro) =>
-                ro._id === restaurantOrder._id ? restaurantOrder : ro
-              ),
-            }
-          : order
-      ),
-      freeRiders: freeRiders || [],
-      loading : false
-    }));
+      set((state) => ({
+        orders: state.orders.map((order) =>
+          order._id === orderId
+            ? {
+                ...order,
+                restaurantOrders: order.restaurantOrders.map((ro) =>
+                  ro._id === restaurantOrder._id ? restaurantOrder : ro,
+                ),
+              }
+            : order,
+        ),
+        freeRiders: freeRiders || [],
+        loading: false,
+      }));
 
-    return res.data;
-  } catch (err) {
-    set({
-      error: err.response?.data?.message || "Failed to update order status",
-      loading:true
-    });
-  }
-},
+      return res.data;
+    } catch (err) {
+      set({
+        error: err.response?.data?.message || "Failed to update order status",
+        loading: true,
+      });
+    }
+  },
 
+  getDeliveryRiderAssignment: async () => {
+    try {
+      const res = await axiosInstance.get("/order/get-assignment", {
+        withCredentials: true,
+      });
 
-getDeliveryRiderAssignment : async () => {
-  try {
-     const res = await axiosInstance.get(
-      "/order/get-assignment",
-       { withCredentials: true }
-    );
-
-    set({ assignment: res.data, loading: false });
-
-  } catch (err) {
-     set({
+      set({ assignment: res.data, loading: false });
+    } catch (err) {
+      set({
         error: err.response?.data?.message || "Failed to fetch orders",
         loading: false,
       });
       throw err;
-  }
-},
+    }
+  },
 
+  acceptAssignment: async (assignmentId) => {
+    try {
+      set({ loading: true, error: null });
+
+      const res = await axiosInstance.post(
+        `/order/accept-order/${assignmentId}`,
+        { assignmentId },
+        { withCredentials: true },
+      );
+      set({
+        loading: false,
+      });
+
+      return res.data;
+    } catch (err) {
+      set({
+        error: err.response?.data?.message || "Order failed",
+        loading: false,
+      });
+      throw err;
+    }
+  },
+
+  getRiderCurrentOrder: async () => {
+    set({ loading: true });
+    try {
+      // Direct call to your new controller endpoint
+      const res = await axiosInstance.get("/order/riders-order",
+        { withCredentials: true },
+      );
+      
+      // Update state with the specific restaurantOrder and customer data
+      set({ currentOrder: res.data.restaurantOrder ? res.data : null });
+    } catch (error) {
+      console.error("Error fetching rider order:", error);
+      // Don't toast 404s/nulls if it's just "no active order"
+      if (error.response?.status !== 200) {
+        console.log(error.response?.data?.message || "Failed to load current order");
+      }
+      set({ currentOrder: null });
+    } finally {
+      set({ loading: false });
+    }
+  },
   /* ---------------- CLEAR ORDERS (LOGOUT) ---------------- */
   clearOrders: () => set({ orders: [] }),
 }));
