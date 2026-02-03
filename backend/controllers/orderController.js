@@ -3,6 +3,9 @@ import Order from "../models/order.models.js";
 import Restaurant from "../models/restaurant.models.js";
 import User from "../models/users.models.js";
 
+import crypto from 'crypto';
+import { sendEmail } from "../utils/sentOTP_Mail.js"; // Ensure path is correct
+
 /* ================= PLACE ORDER ================= */
 export const placeOrder = async (req, res) => {
   try {
@@ -148,112 +151,135 @@ export const getMyOrders = async (req, res) => {
   }
 };
 
+// Helper for Stateless OTP verification (No DB field needed)
+const createOTPHash = (orderId, otp) => {
+  const secret = process.env.OTP_SECRET ;
+  return crypto.createHmac("sha256", secret)
+               .update(`${orderId}${otp}`)
+               .digest("hex");
+};
+
 /* ================= UPDATE ORDER STATUS ================= */
 export const updateOrderStatus = async (req, res) => {
   try {
-    const { orderId, restaurantOrderId, status } = req.body;
+    const { orderId, restaurantOrderId, status, otp, otpHash } = req.body;
+    const userRole = req.userId.role;
 
     if (!orderId || !restaurantOrderId || !status) {
       return res.status(400).json({ message: "Missing fields" });
     }
 
-    const order = await Order.findById(orderId);
+    const order = await Order.findById(orderId).populate("user", "name email phone");
     if (!order) return res.status(404).json({ message: "Order not found" });
 
     const restaurantOrder = order.restaurantOrders.id(restaurantOrderId);
-    if (!restaurantOrder)
-      return res.status(404).json({ message: "Restaurant order not found" });
+    if (!restaurantOrder) return res.status(404).json({ message: "Restaurant order not found" });
 
-    //  update status
-    restaurantOrder.status = status;
+    // --- 1. RIDER OTP VERIFICATION ---
+    if (userRole === "Rider" && status === "delivered") {
+      if (!otp || !otpHash) {
+        return res.status(400).json({ message: "Delivery OTP is required to complete this order." });
+      }
+
+      const verifiedHash = createOTPHash(orderId, otp);
+      if (verifiedHash !== otpHash) {
+        return res.status(400).json({ message: "Invalid OTP. Please ask the customer for the correct code." });
+      }
+
+      // Mark assignment as completed
+      await DeliveryAssignment.findOneAndUpdate(
+        { restaurantOrderId: restaurantOrder._id, status: "assigned" },
+        { status: "completed" }
+      );
+    }
+
+    // --- 2. GENERATE & SEND OTP (When moving to "out of delivery") ---
+    let newOtpHash = null;
+    if (status === "out of delivery") {
+      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      newOtpHash = createOTPHash(orderId, generatedOtp);
+
+      const emailHtml = `
+        <div style="font-family: sans-serif; max-width: 400px; margin: auto; border: 1px solid #eee; border-radius: 15px; padding: 20px;">
+          <h2 style="color: #f97316; text-align: center;">Order is on the way! 🛵</h2>
+          <p>Hi <strong>${order.user?.name}</strong>,</p>
+          <p>Your order from <strong>${restaurantOrder.name}</strong> has been picked up.</p>
+          <div style="background: #fff7ed; border: 2px dashed #f97316; padding: 20px; text-align: center; border-radius: 10px;">
+            <p style="margin: 0; font-size: 10px; color: #f97316; font-weight: bold; text-transform: uppercase;">Share this OTP with Rider</p>
+            <h1 style="margin: 10px 0; font-size: 36px; letter-spacing: 8px; color: #111;">${generatedOtp}</h1>
+          </div>
+          <p style="font-size: 11px; color: #888; text-align: center; margin-top: 15px;">Only share this code once you have received your package.</p>
+        </div>
+      `;
+
+      // Async send email (don't await if you want faster response, or await for reliability)
+      sendEmail(order.user.email, "Your Delivery OTP - Vingo", emailHtml)
+      .catch(err => console.error("Email Error:", err));
+    }
+
+    // --- 3. ORIGINAL RIDER ASSIGNMENT LOGIC ---
 
     let freeRidersPayload = [];
 
-    //  Only assign rider when order is READY
-    if (status === "out of delivery" && !restaurantOrder.assignment) {
+    if (status === "out of delivery" && !restaurantOrder.delivery_assignment) {
+
       const { longitude, latitude } = order.deliveryAddress;
 
       const nearByRiders = await User.find({
         role: "Rider",
         location: {
           $near: {
-            $geometry: {
-              type: "Point",
-              coordinates: [Number(longitude), Number(latitude)],
-            },
+            $geometry: { type: "Point", coordinates: [Number(longitude), Number(latitude)] },
             $maxDistance: 5000,
           },
         },
       });
 
-      const nearByIds = nearByRiders.map((r) => r._id);
-
       const busyRiders = await DeliveryAssignment.find({
-        assignedTo: { $in: nearByIds },
         status: { $in: ["assigned", "broadcasted"] },
       }).distinct("assignedTo");
 
-      const busySet = new Set(busyRiders.map(String));
+      const busySet = new Set(busyRiders.filter(id => id).map(String));
+      const freeRiders = nearByRiders.filter((r) => !busySet.has(String(r._id)));
 
-      const freeRiders = nearByRiders.filter(
-        (r) => !busySet.has(String(r._id)),
-      );
-
-      if (freeRiders.length == 0) {
-        await order.save();
-        return res.json({
-          message: "Order updated, all riders busy",
+      if (freeRiders.length > 0) {
+        const delivery_assignment = await DeliveryAssignment.create({
+          order: order._id,
+          restaurant: restaurantOrder.restaurant,
+          restaurantOrderId: restaurantOrder._id,
+          broadcastedTo: freeRiders.map(r => r._id),
+          status: "broadcasted",
         });
+
+        restaurantOrder.assignedDeliveryRider = delivery_assignment.assignedTo;
+        restaurantOrder.delivery_assignment = delivery_assignment._id;
+
+        freeRidersPayload = freeRiders.map(r => ({ id: r._id, name: r.name, phone: r.phone }));
       }
-
-      //  Create ONE delivery_assignment (broadcast logic later)
-      const delivery_assignment = await DeliveryAssignment.create({
-        order: order._id,
-        restaurant: restaurantOrder.restaurant,
-        restaurantOrderId: restaurantOrder._id,
-        broadcastedTo: freeRiders,
-        status: "broadcasted",
-      });
-
-      restaurantOrder.assignedDeliveryRider = delivery_assignment.assignedTo;
-      restaurantOrder.delivery_assignment = delivery_assignment._id;
-
-      freeRidersPayload = freeRiders.map((r) => ({
-        id: r._id,
-        name: r.name,
-        longitude: r.location.coordinates[0],
-        latitude: r.location.coordinates[1],
-        phone: r.phone,
-        email: r.email,
-      }));
     }
 
+    // --- 4. SAVE AND RESPOND ---
+    restaurantOrder.status = status;
     await order.save();
 
     await order.populate("restaurantOrders.restaurant", "name");
-    await order.populate(
-      "restaurantOrders.assignedDeliveryRider",
-      "name email phone",
-    );
+    await order.populate("restaurantOrders.assignedDeliveryRider", "name email phone");
 
-    const updatedRestOrder = order.restaurantOrders.find(
-      (o) => String(o._id) === String(restaurantOrderId),
-    );
-
-    console.log(updatedRestOrder);
+    const updatedRestOrder = order.restaurantOrders.id(restaurantOrderId);
 
     return res.json({
-      message: "Order status updated",
+      message: "Order status updated successfully",
       restaurantOrder: updatedRestOrder,
-      assignedDeliveryRider: updatedRestOrder.assignedDeliveryRider,
       freeRiders: freeRidersPayload,
-      delivery_assignment: updatedRestOrder.delivery_assignment?._id,
+      otpHash: newOtpHash, // Rider MUST store this in state to verify later
     });
+
   } catch (error) {
     console.error("UPDATE STATUS ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };
+
 
 /*================Get the order_assignment for rider to accept ===============*/
 export const getDeliveryRiderAssignment = async (req, res) => {
@@ -298,8 +324,6 @@ export const acceptOrder = async (req, res) => {
     if (!assignment) {
       return res.status(201).json({ message: " assignment not founded" });
     }
-
-    console.log(assignment);
 
     if (assignment.status != "broadcasted") {
       return res.status(201).json({ message: " assignment is expired" });

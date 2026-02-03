@@ -80,11 +80,14 @@ export const useOrderStore = create((set) => ({
   },
 
   /* ---------------- UPDATE ORDER STATUS ---------------- */
-  updateOrderStatus: async (orderId, restaurantOrderId, status) => {
+  updateOrderStatus: async (orderId, restaurantOrderId, status, otp , otpHash=null) => {
     try {
+      const payload = { status };
+      if (otp) payload.otp = otp; // Only add OTP if it exists
+
       const res = await axiosInstance.put(
         "/order/update-status",
-        { orderId, restaurantOrderId, status },
+        { orderId, restaurantOrderId, status, otp , otpHash  },
         { withCredentials: true },
       );
 
@@ -157,17 +160,19 @@ export const useOrderStore = create((set) => ({
     set({ loading: true });
     try {
       // Direct call to your new controller endpoint
-      const res = await axiosInstance.get("/order/riders-order",
-        { withCredentials: true },
-      );
-      
+      const res = await axiosInstance.get("/order/riders-order", {
+        withCredentials: true,
+      });
+
       // Update state with the specific restaurantOrder and customer data
       set({ currentOrder: res.data.restaurantOrder ? res.data : null });
     } catch (error) {
       console.error("Error fetching rider order:", error);
       // Don't toast 404s/nulls if it's just "no active order"
       if (error.response?.status !== 200) {
-        console.log(error.response?.data?.message || "Failed to load current order");
+        console.log(
+          error.response?.data?.message || "Failed to load current order",
+        );
       }
       set({ currentOrder: null });
     } finally {

@@ -46,7 +46,7 @@ const restaurantOrderSchema = new mongoose.Schema(
 
     status:{
       type:String,
-      enum:["pending" , "preparing" ,"delivered","out of delivery"],
+      enum:["pending" , "preparing" ,"delivered","out of delivery", "completed"],
       default:"pending"
     },
 
