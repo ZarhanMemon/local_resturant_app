@@ -6,7 +6,9 @@ import { useAuthStore } from "../context/useAuthStore.js";
 import DeliveryBoyTracking from "./DeliveryBoyTracking.jsx";
 
 function MyOrders() {
+  
   const navigate = useNavigate();
+
   const { authUser } = useAuthStore();
   const {
     orders,
@@ -135,6 +137,7 @@ function MyOrders() {
               {/* Track Order Button for this specific sub-order */}
               {restOrder.status !== "delivered" ? (
                 <button
+                  onClick={() => navigate(`/tracking-order/${order._id}`)}
                   className="mt-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-bold w-full transition-colors active:scale-95"
                 >
                   Track Order

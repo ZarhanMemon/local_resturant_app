@@ -22,7 +22,7 @@ import CartPage from "./components/CartPage.jsx";
 import CheckOut from "./components/CheckOut.jsx";
 import OrderDone from "./components/OrderDone.jsx";
 import MyOrders from "./components/MyOrders.jsx";
-
+import TrackingOrder from "./components/TrackingOrder.jsx";
 
 import "./App.css";
 
@@ -70,7 +70,7 @@ function App() {
           <Route path="/checkout" element={<CheckOut />} />
           <Route path="/order-done" element={<OrderDone/>}/>
           <Route path="/my-orders" element={<MyOrders/>} />
-
+          <Route path="/tracking-order/:orderId" element={<TrackingOrder/>} />
 
 
           {/* Redirect unknown routes to home */}

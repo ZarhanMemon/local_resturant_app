@@ -179,6 +179,21 @@ export const useOrderStore = create((set) => ({
       set({ loading: false });
     }
   },
+
+  getOrderById: async (orderId) => {
+    set({ loading: true });
+    try {
+      const res = await axiosInstance.get(`/order/get-order-by-id/${orderId}`, {
+        withCredentials: true,
+      });
+      return res.data;
+    } catch (error) {
+      console.error("Error fetching order by ID:", error);
+      set({ loading: false });
+      throw error;
+    }
+  },
+
   /* ---------------- CLEAR ORDERS (LOGOUT) ---------------- */
   clearOrders: () => set({ orders: [] }),
 }));

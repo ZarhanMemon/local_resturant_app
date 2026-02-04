@@ -427,3 +427,22 @@ export const getRiderCurrentOrder = async (req, res) => {
     res.status(500).json({ message: "Server error fetching active order" });
   }
 };
+
+
+export const getOrderById = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId)
+      .populate("user", "name phone email")
+      .populate("restaurantOrders.restaurant", "name location address")
+      .populate("restaurantOrders.assignedDeliveryRider", "name phone email location");
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    } 
+    res.status(200).json(order);
+  } catch (error) {
+    console.error("GET ORDER BY ID ERROR:", error);
+    res.status(500).json({ message: "Server error fetching order" });
+  }
+};
