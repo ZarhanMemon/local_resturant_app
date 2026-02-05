@@ -30,7 +30,6 @@ function ItemCard({ data }) {
       : `₹${Math.round(finalPrice)}`;
 
 
-  console.log("Cart Items:", cartItems);
 
   return (
     <div className="w-[170px] bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">

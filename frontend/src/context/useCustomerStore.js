@@ -2,15 +2,20 @@ import { create } from "zustand";
 import { axiosInstance } from "../api/axios";
 
 export const useCustomerStore = create((set,get) => ({
-  allRest: [],
   allItems: [],
 
-  restByName: [],
+  restByName: [], // not use
   restByCity: [],
 
-  itemsByCategory: [],
-  itemsByName: [],
-  
+  searchItems: [],
+  searchActive: false,
+  searchQuery: "",
+
+  // unified items array used by UI for all fetch types (all / category / restaurant / search)
+  items: [],
+
+ 
+
   cartItems: [],
 
   // ➕ ADD TO CART (or increase if already exists)
@@ -103,9 +108,21 @@ export const useCustomerStore = create((set,get) => ({
       const res = await axiosInstance.get("/items/all-items");
       set({
         allItems: res.data,
+        items: res.data,
       });
     } catch (error) {
       console.error("allItems data error:", error);
+    }
+  },
+
+  // restore items from cache (allItems) or fetch if cache empty
+  clearItems: async () => {
+    const state = get();
+    if (!state.allItems || state.allItems.length === 0) {
+      await state.getAllItems();
+    } else {
+      // restore items and clear any active search metadata so UI hides search results
+      set({ items: state.allItems, searchActive: false, searchItems: [], searchQuery: "" });
     }
   },
 
@@ -133,24 +150,32 @@ export const useCustomerStore = create((set,get) => ({
     }
   },
 
+
   getItemsByCategory: async (category) => {
     try {
-      const res = await axiosInstance.get(`/items/all-items/${category}`);
-      set({
-        itemsByCategory: res.data,
-      });
+      const res = await axiosInstance.get(`/items/category/${category}`);
+      set({ items: res.data });
     } catch (error) {
-      console.error("itemsByCategory data error:", error);
+      console.error("getItemsByCategory error:", error);
     }
   },
-  getItemsByName: async (name) => {
+
+  getItemsByRestName: async (res_name) => {
     try {
-      const res = await axiosInstance.get(`/items/all-items/${name}`);
-      set({
-        itemsByName: res.data,
-      });
+      const res = await axiosInstance.get(`/items/restaurant/${res_name}`);
+      set({ items: res.data });
     } catch (error) {
-      console.error("itemsByName data error:", error);
+      console.error("getItemsByRestName error:", error);
     }
   },
+
+  getItemByName: async (name) => {
+    try {
+      const res = await axiosInstance.get(`/items/search/${name}?query=${name}&city=${get().location}`); // get.location from getUserLocation.js zustand for city filter
+      set({ searchItems: res.data, searchActive: true, searchQuery: name });
+    } catch (error) {
+      console.error("getItemByName error:", error);
+    }
+  },
+
 }));

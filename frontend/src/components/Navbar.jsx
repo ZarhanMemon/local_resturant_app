@@ -12,6 +12,8 @@ const Navbar = ({ myRestData }) => {
   const { authUser, logout } = useAuthStore();
   const navigate = useNavigate();
 
+  const { getItemByName, clearItems } = useCustomerStore();
+
   const [showSearch, setShowSearch] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
@@ -67,6 +69,11 @@ const Navbar = ({ myRestData }) => {
                   type="text"
                   placeholder="search delicious food..."
                   className="flex-1 text-sm outline-none"
+                  onChange={(e) => {
+                    const v = e.target.value.trim();
+                    if (v.length === 0) clearItems();
+                    else{getItemByName(v);}
+                  }} // live search (no debounce)
                 />
               </div>
             </div>
@@ -195,6 +202,11 @@ const Navbar = ({ myRestData }) => {
               type="text"
               placeholder="search delicious food..."
               className="flex-1 text-sm outline-none"
+              onChange={(e) => {
+                const v = e.target.value.trim();
+                if (v.length === 0 ) clearItems();
+                else{getItemByName(v);}
+              }}
             />
           </div>
         </div>

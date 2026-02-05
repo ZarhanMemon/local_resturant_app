@@ -1,9 +1,19 @@
 import React from 'react'
+import { useCustomerStore } from '../context/useCustomerStore.js';
 
-function CategoryCard({ data }) {
+function CategoryCard({ data, onClick, active = false }) {
+
+  const { getItemsByCategory } = useCustomerStore();
+
+  const handleClick = () => {
+    if (onClick) return onClick(data.category);
+    return getItemsByCategory(data.category);
+  };
+
   return (
     <div 
-    className='w-[120px] h-[120px] relative md:w-[180px] md:h-[180px] rounded-2xl border-2 border-[#ff4d2d] shrink-0 overflow-hidden bg-white shadow-xl shadow-gray-200 hover:shadow-lg transition-shadow'>
+    onClick={handleClick}
+    className={`w-[120px] h-[120px] relative md:w-[180px] md:h-[180px] rounded-2xl border-2 ${active ? 'ring-4 ring-[#ff4d2d] scale-105' : 'border-[#ff4d2d]'} shrink-0 overflow-hidden bg-white shadow-xl shadow-gray-200 hover:shadow-lg transition-shadow`}>
 
       <img 
       src={data.image} 

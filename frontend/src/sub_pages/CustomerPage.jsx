@@ -9,6 +9,7 @@ import CategoryCard from "../components/CategoryCard.jsx";
 import RestaurantCard from "../components/RestaurantCard.jsx";
 import ItemCard from "../components/ItemCard.jsx";
 
+
 const categories = [
   { category: "Snacks", image: "www.istockphoto.com" },
   { category: "Main Course", image: "www.istockphoto.com" },
@@ -28,13 +29,16 @@ const categories = [
 
 function CustomerPage() {
   const { authUser } = useAuthStore();
-  const { restByCity, getRestaurantByCity } = useCustomerStore();
+  const { searchItems, searchQuery, items, allItems, getAllItems, restByCity, getRestaurantByCity, getItemsByCategory, getItemsByRestName, clearItems } = useCustomerStore();
 
   const isCustomer = authUser?.role === "Customer";
 
   const [location, setLocation] = useState(
     isCustomer ? "Fetching location..." : ""
   );
+
+  const [activeCategory, setActiveCategory] = useState(null);
+  const [activeRestaurant, setActiveRestaurant] = useState(null);
 
   const categoryRef = useRef(null);
   const restaurantRef = useRef(null);
@@ -48,6 +52,53 @@ function CustomerPage() {
     ref.current.scrollBy({ left: 400, behavior: "smooth" });
   };
 
+  const handleCategoryClick = async (category) => {
+    // 2nd click /toggle off when same category clicked
+    if (activeCategory === category) {
+      setActiveCategory(null);
+      try {
+        await clearItems();
+      } catch (err) {
+        console.error('clearItems error', err);
+      }
+      return;
+    }
+
+    // 1st click on a category or click on a different category
+    try {
+      await getItemsByCategory(category);
+      setActiveCategory(category);
+      setActiveRestaurant(null);
+      if (itemRef.current) itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+      console.error('Error fetching category items:', err);
+    }
+  };
+
+  // Restaurant click handler: toggle restaurant filter and show its items
+  const handleRestaurantClick = async (resName) => {
+    // toggle off
+    if (activeRestaurant === resName) {
+      setActiveRestaurant(null);
+      try {
+        await clearItems();
+      } catch (err) {
+        console.error('clearItems error', err);
+      }
+      return;
+    }
+
+    try {
+      await getItemsByRestName(resName);
+      setActiveRestaurant(resName);
+      setActiveCategory(null);
+      if (itemRef.current) itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+      console.error('Error fetching restaurant items:', err);
+    }
+  };
+
+  // Get user location on mount and fetch restaurants for that location 
   useEffect(() => {
     if (isCustomer) {
       getUserLocation()
@@ -56,13 +107,28 @@ function CustomerPage() {
     }
   }, [isCustomer]);
 
+  // Fetch restaurants for the user's city whenever location changes
   useEffect(() => {
     if (location) getRestaurantByCity(location);
-  }, [location , getRestaurantByCity]);
+  }, [location, getRestaurantByCity]);
+
+  // Fetch all items on mount to have a ready reference for category filtering and to show in suggestions when no category is active
+  useEffect(() => {
+    if (!allItems || allItems.length === 0) getAllItems();
+  }, [allItems, getAllItems]);
 
   return (
     <div className="w-screen min-h-screen bg-[#fff9f6] mt-[90px] pb-10">
       <Navbar />
+
+      {/* ================= SEARCH RESULTS ================= */}
+      {searchQuery && searchItems && searchItems.length > 0 && (
+        <Section title={`Search results for "${searchQuery}"`} refEl={itemRef} onLeft={() => scrollLeft(itemRef)} onRight={() => scrollRight(itemRef)}>
+          {searchItems.map((item) => (
+            <ItemCard key={item._id} data={item} />
+          ))}
+        </Section>
+      )}
 
       {/* ================= CATEGORIES ================= */}
       <Section
@@ -72,7 +138,7 @@ function CustomerPage() {
         onRight={() => scrollRight(categoryRef)}
       >
         {categories.map((cat, i) => (
-          <CategoryCard key={i} data={cat} />
+          <CategoryCard key={i} data={cat} onClick={handleCategoryClick} active={activeCategory === cat.category} />
         ))}
       </Section>
 
@@ -84,21 +150,25 @@ function CustomerPage() {
         onRight={() => scrollRight(restaurantRef)}
       >
         {restByCity.map((rest) => (
-          <RestaurantCard key={rest._id} data={rest} />
+          <RestaurantCard key={rest._id} data={rest} onClick={handleRestaurantClick} active={activeRestaurant === rest.name} />
         ))}
       </Section>
 
       {/* ================= ITEMS ================= */}
       <Section
-        title="Suggested Food items"
+        title={`Suggested Food items${activeCategory || activeRestaurant ? ` — ${activeCategory || activeRestaurant}` : ''}`}
         refEl={itemRef}
         onLeft={() => scrollLeft(itemRef)}
         onRight={() => scrollRight(itemRef)}
       >
-        {restByCity.flatMap((rest) =>
-          rest.items?.map((item) => (
-            <ItemCard key={item._id} data={item} />
-          ))
+        {items && items.length > 0 ? (
+          items.map((item) => <ItemCard key={item._id} data={item} />)
+        ) 
+        :
+         (activeCategory || activeRestaurant) ? (
+          <div className="text-gray-500 p-4">No items found.</div>
+        ) : (
+          restByCity.flatMap((rest) => rest.items?.map((item) => <ItemCard key={item._id} data={item} />))
         )}
       </Section>
     </div>

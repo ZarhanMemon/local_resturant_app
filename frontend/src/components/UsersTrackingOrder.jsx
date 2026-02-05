@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from "lucide-react";
 import DeliveryBoyTracking from "./DeliveryBoyTracking.jsx";
 
-function TrackingOrder() {
+function UsersTrackingOrder() {
   
 
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ function TrackingOrder() {
   console.log("Order Details:", orderDetails);
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-6 p-4 bg-white rounded-lg shadow-md"> 
+    <div className="m-[13px] w-full max-w-4xl mx-auto mt-6 p-4 bg-white rounded-lg shadow-md"> 
       <div className="flex items-center gap-4 p-4 border-b">
         <button onClick={() => navigate("/")}>
           <ArrowLeft className="text-orange-500" />
@@ -86,4 +86,4 @@ function TrackingOrder() {
   )
 }
 
-export default TrackingOrder;
+export default UsersTrackingOrder;
