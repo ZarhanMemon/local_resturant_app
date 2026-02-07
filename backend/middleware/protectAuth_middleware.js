@@ -1,50 +1,37 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/users.models.js';
-import dotenv from 'dotenv';
- 
+
 export const protectRoute = async (req, res, next) => {
-
     try {
-
+        // 1. Get token from cookies
         const token = req.cookies.jwt_token;
 
-        // Check if the token is present in the request cookies
         if (!token) {
-            return res.status(401).json({
-                message: 'Not authorized, no token',
-            });
+            return res.status(401).json({ message: 'Not authorized, no token' });
         }
 
-        dotenv.config(); // Load environment variables from .env file
-
-
-        // Verify the token using the secret key
+        // 2. Verify token (process.env.JWT_SECRET is already loaded in server.js)
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
         if (!decoded) {
-            return res.status(401).json({
-                message: 'Not authorized, token failed',
-            });
+            return res.status(401).json({ message: 'Not authorized, token failed' });
         }
 
-        req.userId = decoded.userId; // ✅ THIS IS REQUIRED (match token payload)
-
-
-        // Find the user associated with the token
+        // 3. Find User
         const user = await User.findById(decoded.userId).select('-password');
+        
         if (!user) {
-            return res.status(401).json({
-                message: 'Not authorized, no user found',
-            });
+            return res.status(401).json({ message: 'Not authorized, no user found' });
         }
-        // Attach the user to the request object for use in the next middleware or route handler
+
+        // 4. Attach to Request
+        req.userId = decoded.userId; 
         req.user = user;
+        
         next();
 
     } catch (error) {
-        return res.status(401).json({
-            message: 'Not authorized, token failed',
-        });
-
+        console.error("Auth Middleware Error:", error.message);
+        return res.status(401).json({ message: 'Not authorized, token failed' });
     }
-
-}
+};
