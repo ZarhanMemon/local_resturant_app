@@ -66,13 +66,14 @@ export const placeOrder = async (req, res) => {
           owner: restaurant.owner._id,
           subTotal,
           status: "pending",
-          restaurantOrderItems: items.map((i) => ({
-            item: i._id,
-            name: i.name,
-            price: i.price,
-            quantity: i.quantity,
-            image: i.image,
-          })),
+         restaurantOrderItems: items.map((i) => ({
+  item: i.productId || i._id, // Support both naming conventions
+  name: i.name,
+  price: i.price,
+  quantity: i.quantity,
+  image: i.image,
+})),
+
         };
       }),
     );
