@@ -12,12 +12,13 @@ export const generateToken = (userId,res) => {
         expiresIn: '7d',
     });
 
-res.cookie("token", token, {
+res.cookie("jwt_token", token, { // Changed "token" to "jwt_token"
   httpOnly: true,
-  secure: true,      // MUST be true for Render (HTTPS)
-  sameSite: "none",  // MUST be "none" for cross-domain cookies
+  secure: true,
+  sameSite: "none",
   maxAge: 7 * 24 * 60 * 60 * 1000, 
 });
+
 
     return token;
 }
