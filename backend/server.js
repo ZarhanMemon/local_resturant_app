@@ -27,7 +27,7 @@ app.set("trust proxy", 1); // Allow secure cookies behind Render's proxy
 
 app.use(
   cors({
-    origin: "https://vingo-local-restaurant-app.onrender.com", // EXACT frontend URL
+    origin: "https://chindi-local-restaurant-app.onrender.com", // EXACT frontend URL
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
