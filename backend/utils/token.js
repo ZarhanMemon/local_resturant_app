@@ -12,11 +12,11 @@ export const generateToken = (userId,res) => {
         expiresIn: '7d',
     });
 
- res.cookie("token", token, {
+res.cookie("token", token, {
   httpOnly: true,
-  secure: true,      // Must be true for HTTPS
-  sameSite: "none",  // Crucial for cross-domain auth
-  maxAge: 7 * 24 * 60 * 60 * 1000,
+  secure: true,      // MUST be true for Render (HTTPS)
+  sameSite: "none",  // MUST be "none" for cross-domain cookies
+  maxAge: 7 * 24 * 60 * 60 * 1000, 
 });
 
     return token;
