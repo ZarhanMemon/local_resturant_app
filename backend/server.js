@@ -23,6 +23,7 @@ dotenv.config();
 
 
 const app = express();
+app.set("trust proxy", 1); // Allow secure cookies behind Render's proxy
 
 app.use(
   cors({
