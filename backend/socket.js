@@ -5,8 +5,9 @@ let io;
 export const initSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: true, // allow any origin in development (adjust for production)
+      origin: "https://vingo-local-restaurant-app.onrender.com", // allow any origin in development (adjust for production)
       credentials: true,
+      methods:['POST','GET']
     },
   });
 
