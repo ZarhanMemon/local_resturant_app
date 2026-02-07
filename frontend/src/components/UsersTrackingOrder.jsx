@@ -33,7 +33,7 @@ function UsersTrackingOrder() {
   return (
     <div className="m-[13px] w-full max-w-4xl mx-auto mt-6 p-4 bg-white rounded-lg shadow-md"> 
       <div className="flex items-center gap-4 p-4 border-b">
-        <button onClick={() => navigate("/")}>
+        <button onClick={() => navigate(-1)}>
           <ArrowLeft className="text-orange-500" />
         </button>
         <h1 className="flex-1 text-center text-lg font-semibold">Track Orders</h1>

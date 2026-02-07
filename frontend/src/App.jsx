@@ -24,6 +24,8 @@ import OrderDone from "./components/OrderDone.jsx";
 import MyOrders from "./components/MyOrders.jsx";
 import UsersTrackingOrder from "./components/UsersTrackingOrder.jsx";
 
+import OrderChat from "./components/OrderChat.jsx";
+
 import "./App.css";
 
 function App() {
@@ -70,7 +72,11 @@ function App() {
           <Route path="/checkout" element={<CheckOut />} />
           <Route path="/order-done" element={<OrderDone/>}/>
           <Route path="/my-orders" element={<MyOrders/>} />
+          
           <Route path="/tracking-order/:orderId" element={<UsersTrackingOrder/>} />
+
+          <Route path="/order/:orderId/chat" element={<OrderChat />} />
+
 
 
           {/* Redirect unknown routes to home */}

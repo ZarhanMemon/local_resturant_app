@@ -82,6 +82,12 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
+    status: {
+      type: String,
+      enum: ["pending", "preparing", "delivered", "out for delivery", "completed"],
+      default: "pending",
+    },
+
     deliveryAddress: {
       address: String,
       latitude: Number,
@@ -94,7 +100,24 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
+
     restaurantOrders: [restaurantOrderSchema],
+
+    // For online payments
+    paymentStatus: {
+      type: Boolean,
+      default: false,
+    },
+
+      razorpayPaymentId: {
+        type: String,
+        default: null,
+      },
+
+      razorpayOrderId: {
+        type: String,
+        default: null,
+      },
   },
   { timestamps: true },
 );

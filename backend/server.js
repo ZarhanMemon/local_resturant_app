@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+import { createServer } from "http";
 
 import connectDB from "./config/db.js";
 
@@ -12,6 +13,9 @@ import restRouter from "./routes/restaurantRoute.js";
 import itemRouter from "./routes/itemRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 
+import { initSocket } from "./socket.js";
+
+
 dotenv.config();
 
 
@@ -19,8 +23,8 @@ const app = express();
 
 app.use(
   cors({
-    // allow both common dev ports (5173/5174) used by Vite dev server
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    // allow local dev frontends (Vite) — accept requests from localhost dev ports
+    origin: true,
     credentials: true, // allow cookies/auth headers
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Specify allowed methods
     allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
@@ -43,14 +47,20 @@ app.use("/api/location",locationRoute);
 
 // if (process.env.NODE_ENV === "production") {
 //   app.use(express.static(path.join(__dirname, "../frontend/dist")));
-
+//
 //   app.get("/*any", (req, res) => {
 //     res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 //   });
 // }
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, async () => {
+
+// Create HTTP server and attach socket.io
+const httpServer = createServer(app);
+
+initSocket(httpServer);
+
+httpServer.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   await connectDB(); // DB connect
 });

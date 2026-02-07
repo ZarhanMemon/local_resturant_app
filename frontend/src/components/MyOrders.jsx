@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Star } from "lucide-react";
 import { useOrderStore } from "../context/useOrderStore.js";
 import { useAuthStore } from "../context/useAuthStore.js";
 import DeliveryBoyTracking from "./DeliveryBoyTracking.jsx";
 
+
 function MyOrders() {
-  
+
   const navigate = useNavigate();
+
 
   const { authUser } = useAuthStore();
   const {
@@ -43,7 +45,7 @@ function MyOrders() {
     } else {
       fetchMyOrders(); // Fetches history for Customer/Owner
     }
-  }, [orders, currentOrder]);
+  }, [fetchMyOrders, getRiderCurrentOrder, isRider]);
 
 
   const handleStatusChange = async (orderId, restOrderId, status, otp = null) => {
@@ -88,6 +90,8 @@ function MyOrders() {
 
 
 
+
+
   return (
     <div className="min-h-screen bg-[#fff9f6] pt-20 px-4 pb-10">
       <div className="flex items-center mb-6">
@@ -107,6 +111,7 @@ function MyOrders() {
             </div>
             <div className="text-right">
               <p className="uppercase font-medium">{order.paymentMethod}</p>
+              <p className="text-xs text-gray-400">{order.status}</p>
             </div>
           </div>
 
@@ -115,7 +120,7 @@ function MyOrders() {
           {/* Restaurant Orders (Inner Loop) */}
           {order.restaurantOrders.map((restOrder) => (
             <div key={restOrder._id} className="mb-4 pb-4 border-b border-gray-100 last:mb-0 last:pb-0 last:border-b-0">
-              <h3 className="font-bold mb-2 text-gray-800">{restOrder.restaurant?.name}</h3>
+              <h3 className="font-bold mb-2 text-gray-800">{restOrder.name}</h3>
 
               {/* Items List (Horizontal Scroll) */}
               <div className="flex gap-3 overflow-x-auto pb-2">
@@ -135,14 +140,24 @@ function MyOrders() {
               </div>
 
               {/* Track Order Button for this specific sub-order */}
-              {restOrder.status !== "delivered" ? (
-                <button
-                  onClick={() => navigate(`/tracking-order/${order._id}`)}
-                  className="mt-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-bold w-full transition-colors active:scale-95"
-                >
-                  Track Order
-                </button>
-              ) : null }
+              {restOrder.status !== "delivered" && (
+                <div className="flex flex-col gap-2">
+
+                  {restOrder.assignedDeliveryRider && (<button
+                    onClick={() => navigate(`/order/${order._id}/chat`, { state: { orderInfo: order } })}
+                    className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm"
+                  >
+                    💬 Message Rider
+                  </button>)}
+
+                  <button
+                    onClick={() => navigate(`/tracking-order/${order._id}`)}
+                    className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-bold w-full transition-colors active:scale-95"
+                  >
+                    Track Order
+                  </button>
+                </div>
+              )}
             </div>
           ))}
 
@@ -242,11 +257,19 @@ function MyOrders() {
                   >
                     <span className="text-white text-xl">📞</span>
                   </a>
+
+                  <button
+                    onClick={() => navigate(`/order/${currentOrder.orderId}/chat`, { state: { orderInfo: currentOrder } })}
+                    className="ml-3 bg-orange-500 text-white shadow-green-100 active:scale-90 transition-transform w-12 h-12 flex items-center justify-center rounded-2xl shadow-lg"
+                  >
+                    💬
+                  </button>
                 </div>
 
                 {/* Map */}
                 <div className="mb-6">
-                  <div className="relative w-full aspect-[4/3] sm:aspect-video rounded-2xl overflow-hidden border-4 border-gray-50 shadow-inner z-10">
+                  {/* The container defines the shape (aspect-ratio) and handles the rounded corners */}
+                  <div className="relative aspect-[4/3] sm:aspect-video rounded-2xl overflow-hidden border-4 border-gray-50 shadow-inner z-10 bg-gray-100">
                     <DeliveryBoyTracking data={currentOrder} />
                   </div>
                 </div>

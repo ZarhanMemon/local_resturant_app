@@ -60,6 +60,36 @@ export const useOrderStore = create((set) => ({
     }
   },
 
+  /* ---------------- VERIFY PAYMENT ---------------- */
+  verifyPayment: async (orderId, razorpayPaymentId) => {
+    try {
+      set({ loading: true, error: null });
+
+      const res = await axiosInstance.post(
+        `/order/verify-payment/${orderId}`,
+        { razorpayPaymentId,orderId },
+        { withCredentials: true },
+      );
+
+      // Update the specific order's payment status in the state
+      set((state) => ({
+        orders: state.orders.map((order) =>
+          order._id === orderId ? { ...order, paymentVerified: true } : order,
+        ),
+        loading: false,
+      }));
+
+      return res.data;
+
+    } catch (err) {
+      set({
+        error: err.response?.data?.message || "Payment verification failed",
+        loading: false,
+      });
+      throw err;
+    }
+  },
+
   /* ---------------- GET MY ORDERS ---------------- */
   fetchMyOrders: async () => {
     try {

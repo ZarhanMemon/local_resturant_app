@@ -21,6 +21,7 @@ import "leaflet/dist/leaflet.css";
 
 
 import axios from "axios";
+
 const GEO_KEY = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
 
@@ -62,6 +63,7 @@ function CheckOut() {
 
   const { cartItems, getTotalAmount, removeFromCart } = useCustomerStore();
   const { location, address, setLocation, setAddress } = useAddressStore();
+  const { verifyPayment } = useOrderStore();
 
   const [paymentMethod, setPaymentMethod] = useState("cod");
 
@@ -109,20 +111,67 @@ function CheckOut() {
   const { placeOrder } = useOrderStore();
 
   const handlePlaceOrder = async () => {
-     if (!cartItems.length) return alert("Cart is empty");
+    if (!cartItems.length) return alert("Cart is empty");
 
-  const order = await placeOrder({
-    cartItems,
-    paymentMethod,
-    address,
-    location,
-    totalAmount: total,
-  });
+    const order = await placeOrder({
+      cartItems,
+      paymentMethod,
+      address,
+      location,
+      totalAmount: total,
+    });
 
-  removeFromCart();
-  navigate("/order-done", { state: { order } });
+    if ( paymentMethod === "online" ) {
+     
+      // Open the Razorpay window -> for that we need to generate a payment order on the backend and get the orderId and other details -> then only we can open the Razorpay payment window with the required details (amount, orderId, etc)
+      // After payment is successful, we need to verify the payment on the backend by sending the razorpayPaymentId and orderId to the backend -> backend will verify the payment with Razorpay and then update the order status to "paid"
+     
+      const { orderId , razorpayOrder , razorpayKeyId} = order.data; // Extract the order object from the response
+
+      openRazorpayPaymentWindow(orderId , razorpayOrder , razorpayKeyId);
+     
+    }
+    else if ( paymentMethod === "cod" ) {
+      removeFromCart();
+      navigate("/order-done", { state: { order } });
+    }
   };
 
+
+  const openRazorpayPaymentWindow = (orderId , razorOrderDetails , razorpayKeyId) => {
+
+    const options = {
+      key: razorpayKeyId, // Razorpay key ID from the backend
+      amount: razorOrderDetails.amount, // Amount in paise (e.g., ₹500 = 50000 paise),
+      currency: razorOrderDetails.currency, // Currency code (e.g., "INR")
+      name: "Vingo - local food delivery App",
+      description: "Complete your payment",
+       
+      order_id: razorOrderDetails.id, 
+
+      handler: async (response) => {
+
+        verifyPayment(orderId, response.razorpay_payment_id)
+
+        .then((res) => {
+
+          console.log("Payment verified successfully:", res.data);
+           
+          removeFromCart();
+          navigate("/order-done", { state: { order: res.data.order } });  // same user move to OrderDone page
+        })
+        .catch((err) => {
+          console.error("Payment verification failed:", err);
+          alert("Payment verification failed. Please contact support.");
+        });
+
+      }
+    };
+
+    const razorpay = new window.Razorpay(options); //Razorpay is loaded as a script in index.html, so we can access it via window.Razorpay and open it by options passed from backend which includes orderId and keyId
+    razorpay.open();
+
+  }
   return (
     <div className="w-screen min-h-screen bg-[#fff9f6] pt-[90px]">
       <button
@@ -219,6 +268,7 @@ function CheckOut() {
               </p>
             </button>
 
+            {/* ONLINE Pay - Razor pay here ogic */}
             <button
               onClick={() => setPaymentMethod("online")}
               className={`border rounded-lg p-4 text-left transition

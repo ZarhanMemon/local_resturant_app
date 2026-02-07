@@ -75,8 +75,18 @@ function ItemCard({ data }) {
         {/* RATING */}
         {rating?.average > 0 && (
           <div className="flex items-center gap-1 text-xs text-gray-600">
-            <Star size={12} className="fill-yellow-400 text-yellow-400" />
-            <span className="font-medium">
+            {/* This creates an array of 5 stars and colours them based on average */}
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                size={12}
+                className={`${star <= Math.round(rating.average)
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-gray-300"
+                  }`}
+              />
+            ))}
+            <span className="font-medium ml-1">
               {rating.average.toFixed(1)}
             </span>
             <span className="text-gray-400">
@@ -84,6 +94,7 @@ function ItemCard({ data }) {
             </span>
           </div>
         )}
+
 
         {/* PRICE + QTY */}
         <div className="mt-1 flex items-center justify-between">

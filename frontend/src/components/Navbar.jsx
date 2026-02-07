@@ -17,7 +17,7 @@ const Navbar = ({ myRestData }) => {
   const [showSearch, setShowSearch] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
-  const { cartItems } = useCustomerStore(); // Get cart items from the store 
+  const { cartItems} = useCustomerStore(); // Get cart items from the store 
   const { orders } = useOrderStore()        // for the owner that he have order from customer
   const { currentOrder} = useOrderStore(); // for notify rider he have the order to deliver
 
@@ -45,6 +45,8 @@ const Navbar = ({ myRestData }) => {
         .catch(() => setLocation("City"));
     }
   }, [isCustomer]);
+
+  
 
   return (
     <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">

@@ -1,6 +1,6 @@
 import React from 'react'
 import L from 'leaflet'; // 1. Import the Leaflet library
-import { MapContainer, TileLayer, Marker, Popup , Polyline} from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 //  Define the emoji icon
@@ -27,7 +27,7 @@ function DeliveryBoyTracking({ data }) {
     const deliveryLocLat = data?.deliveryAddress?.latitude;
     const deliveryLocLon = data?.deliveryAddress?.longitude;
 
-    console.log(deliveryLocLat , deliveryLocLon)
+    console.log(deliveryLocLat, deliveryLocLon)
 
     // Check if coordinates exist before proceeding
     if (!riderLocLat || !riderLocLon || !deliveryLocLat || !deliveryLocLon) {
@@ -40,7 +40,7 @@ function DeliveryBoyTracking({ data }) {
 
     const deliveryPath = [
         [riderLocLat, riderLocLon],
-        [deliveryLocLat,deliveryLocLon]
+        [deliveryLocLat, deliveryLocLon]
     ]
 
     const centreMap = [riderLocLat, riderLocLon];
@@ -48,9 +48,10 @@ function DeliveryBoyTracking({ data }) {
     return (
         <div className="mt-3 h-48 rounded-lg overflow-hidden border">
             <MapContainer
-                className="w-full h-full"
+                style={{ height: "100%", width: "100%" }} // <--- This is the most important fix
                 center={centreMap}
-                zoom={16}
+                zoom={15}
+                scrollWheelZoom={false}
             >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org">OpenStreetMap</a> contributors'
@@ -66,13 +67,13 @@ function DeliveryBoyTracking({ data }) {
                     </Marker>
                 )}
 
-                 {/* The Navigator Line */}
-        <Polyline 
-            positions={deliveryPath} 
-            color="blue" 
-            dashArray="10, 10" //makes the line dashed
-            weight={3} 
-        />
+                {/* The Navigator Line */}
+                <Polyline
+                    positions={deliveryPath}
+                    color="blue"
+                    dashArray="10, 10" //makes the line dashed
+                    weight={3}
+                />
 
             </MapContainer>
         </div>

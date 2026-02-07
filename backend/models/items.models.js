@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 const itemSchema = new mongoose.Schema(
   {
     // 🔹 BASIC INFO
+
+    
     name: {
       type: String,
       required: true,
@@ -69,10 +71,6 @@ const itemSchema = new mongoose.Schema(
       default: 0,
     },
 
-    rating:{
-      average:{type: Number,default: 0,},
-      count:{type: Number,default: 0,}
-    }
   },
   { timestamps: true }
 );

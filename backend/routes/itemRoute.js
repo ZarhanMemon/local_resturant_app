@@ -10,13 +10,12 @@ itemRouter.post('/add-item', protectRoute, upload.single("image") ,addItem);
 itemRouter.put('/edit-item/:itemId', protectRoute, upload.single("image") ,editItem);
 itemRouter.delete('/delete-item/:itemId', protectRoute, deleteItem);
 
+itemRouter.get('/all-items',protectRoute, getAllItems);
+itemRouter.get('/item/:itemId',protectRoute, getItemById);
+itemRouter.get('/category/:category',protectRoute, getItemsByCategory);
+itemRouter.get('/restaurant/:res_name',protectRoute, getItemByRestName);
+itemRouter.get('/search/:name',protectRoute, getItemByName);
 
-// Public, explicit item retrieval endpoints
-itemRouter.get('/all-items', getAllItems);
-itemRouter.get('/item/:itemId', getItemById);
-itemRouter.get('/category/:category', getItemsByCategory);
-itemRouter.get('/restaurant/:res_name', getItemByRestName);
-itemRouter.get('/search/:name', getItemByName);
 
 
 

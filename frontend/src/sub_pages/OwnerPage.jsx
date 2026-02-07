@@ -9,12 +9,12 @@ function OwnerPage() {
 
   const { myRestData, getRestaurant, deleteItem } = useOwnerStore();
 
- 
+
   const navigate = useNavigate();
 
   useEffect(() => {
     getRestaurant();
-  }, );
+  }, [getRestaurant]);
 
 
 
@@ -56,11 +56,11 @@ function OwnerPage() {
         {myRestData && (
           <div className="w-full max-w-md sm:max-w-3xl">
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-              <div className="relative">
+              <div className="relative h-40 sm:h-56"> {/* Parent defines the length/height */}
                 <img
                   src={myRestData.image || "/fallback-restaurant.jpg"}
                   alt={myRestData.name}
-                  className="w-full h-40 sm:h-56 object-cover"
+                  className="w-full h-full object-cover" // Image fills the height perfectly
                 />
                 <button
                   onClick={() => navigate("/create-edit-restaurant")}
@@ -69,6 +69,7 @@ function OwnerPage() {
                   ✏️
                 </button>
               </div>
+
 
               <div className="p-4 sm:p-6">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-800">
