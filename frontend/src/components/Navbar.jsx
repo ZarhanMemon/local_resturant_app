@@ -54,7 +54,7 @@ const Navbar = ({ myRestData }) => {
         <div className="flex items-center justify-between h-16">
           {/* LOGO (COMMON) */}
           <Link to="/" className="text-2xl font-bold text-orange-500">
-            Vingo
+           Chindi
           </Link>
 
           {/* CUSTOMER DESKTOP SEARCH */}

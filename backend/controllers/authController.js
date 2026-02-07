@@ -141,7 +141,7 @@ export const forgotPassword = async (req, res) => {
     // here the nodemailer function to send email - u can see the same function in thier docs
     await sendEmail(
       email,
-      "Reset your password - Vingo",
+      "Reset your password - Chindi",
       `
       <h2>Password Reset</h2>
       <p>Your OTP is:</p>

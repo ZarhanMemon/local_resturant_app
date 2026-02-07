@@ -344,7 +344,7 @@ export const updateOrderStatus = async (req, res) => {
       `;
 
       // Async send email (don't await if you want faster response, or await for reliability)
-      sendEmail(order.user.email, "Your Delivery OTP - Vingo", emailHtml).catch(
+      sendEmail(order.user.email, "Your Delivery OTP - Chindi", emailHtml).catch(
         (err) => console.error("Email Error:", err),
       );
     }

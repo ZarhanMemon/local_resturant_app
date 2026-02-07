@@ -144,7 +144,7 @@ function CheckOut() {
       key: razorpayKeyId, // Razorpay key ID from the backend
       amount: razorOrderDetails.amount, // Amount in paise (e.g., ₹500 = 50000 paise),
       currency: razorOrderDetails.currency, // Currency code (e.g., "INR")
-      name: "Vingo - local food delivery App",
+      name: "Chindi - local food delivery App",
       description: "Complete your payment",
        
       order_id: razorOrderDetails.id, 

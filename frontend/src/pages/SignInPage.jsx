@@ -73,7 +73,7 @@ const SignInPage = () => {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 space-y-6">
         {/* Header */}
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-orange-500">Vingo</h1>
+          <h1 className="text-2xl font-bold text-orange-500">Chindi</h1>
           <p className="text-sm text-gray-500">
             Sign In to your account to start ordering delicious food 🍔
           </p>
