@@ -1,11 +1,12 @@
 import axios from 'axios';
 
-// 1. Point this to your ACTUAL Render Backend URL
+// Ensure the URL matches your Render URL exactly + /api
 const BASE_URL = import.meta.env.MODE === "development" 
   ? "http://localhost:5000/api" 
-  : "https://vingo-backend-isei.onrender.com"; // Your Render URL from the screenshot
+  : "https://vingo-backend-isei.onrender.com"; 
 
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true, 
+  withCredentials: true, // Crucial for JWT cookies to work across domains
 });
+
