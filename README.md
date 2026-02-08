@@ -268,4 +268,4 @@ MIT
 
 ---
 
-Thank you for exploring Vingo!
+Thank you for exploring Chindi!
