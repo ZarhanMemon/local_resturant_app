@@ -1,6 +1,6 @@
-# Vingo — Full-Stack Food Delivery Web App
+# Chindi — Full-Stack Food Delivery Web App
 
-Vingo is a full‑stack food delivery application that connects customers with local restaurants, owners, and delivery partners. It includes role‑based dashboards, real‑time order tracking, secure payments (Razorpay), OTP flows, image uploads (Cloudinary), maps/geocoding, and email notifications.
+Chindi is a full‑stack food delivery application that connects customers with local restaurants, owners, and delivery partners. It includes role‑based dashboards, real‑time order tracking, secure payments (Razorpay), OTP flows, image uploads (Cloudinary), maps/geocoding, chat system and email notifications.
 
 Monorepo layout:
 - frontend: Vite + React + Redux Toolkit + Tailwind CSS + Socket.IO client + Leaflet + Firebase Auth
