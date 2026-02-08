@@ -1,63 +1,127 @@
-# Chindi — Full-Stack Food Delivery Web App
+# 🍔 Chindi — Full-Stack Food Delivery Web Application
 
-Chindi is a full‑stack food delivery application that connects customers with local restaurants, owners, and delivery partners. It includes role‑based dashboards, real‑time order tracking, secure payments (Razorpay), OTP flows, image uploads (Cloudinary), maps/geocoding, chat system and email notifications.
+Chindi is a full-stack food delivery web application that connects **Customers**, **Restaurant Owners**, and **Delivery Riders** on a single platform.  
+It supports role-based dashboards, live order tracking, rider assignment, OTP-based delivery confirmation, real-time chat, and a modern mobile-first UI.
 
-Monorepo layout:
-- frontend: Vite + React + Redux Toolkit + Tailwind CSS + Socket.IO client + Leaflet + Firebase Auth
-- backend: Node.js (Express 5) + MongoDB (Mongoose) + Socket.IO + JWT (cookies) + Razorpay + Cloudinary + Nodemailer
-
----
-
-## Table of Contents
-- Overview
-- Features by Role
-- Architecture
-- Tech Stack
-- Project Structure
-- Prerequisites
-- Configuration (Environment Variables)
-- Running Locally
-- API Overview
-- Real‑Time Events
-- Payments
-- Emails & Media
-- Scripts
-- Deployment Notes
-- Troubleshooting
-- Contributing
-- License
+This project was built as a **learning + portfolio project**, inspired by real-world food delivery apps.
 
 ---
 
-## Overview
-Vingo provides a seamless ordering experience with real‑time delivery tracking and role‑specific interfaces:
-- Customers browse shops and items, manage carts, place orders (COD or online), and track deliveries.
-- Owners manage shop details and menus, and process shop‑specific orders.
-- Delivery partners receive assignment updates and share live location.
-- Admins manage users, shops, items, and orders via the admin dashboard.
+## 📌 Overview
 
-## Features by Role
-- Customer
-  - Auth (email/password + Google)
-  - City autodetect and reverse geocoding
-  - Browse shops/items by city
-  - Cart and checkout with COD or Razorpay
-  - Live order status and delivery location
-- Owner
-  - Create/Edit shop (with image upload)
-  - Manage items and incoming orders
-- Delivery Partner
-  - Accept assignments, share live location
-  - Confirm delivery via OTP
-- Admin
-  - Admin dashboard for users/shops/items/orders
+Chindi provides a complete food-ordering flow:
 
-## Architecture
-- Frontend (Vite/React)
-  - State: Redux Toolkit (user, owner, map slices)
-  - Maps: Leaflet via react‑leaflet, geocoding via Geoapify
-  - Realtime: socket.io‑client with a custom Redux middleware
-  - Payments: Razorpay Web SDK
+- **Customers** can browse restaurants, place orders, track delivery, and chat with riders.  
+- **Restaurant owners** manage incoming orders and assign riders.  
+- **Delivery riders** receive active tasks, share live location, and confirm delivery using OTP.  
+
+Each role sees a different UI and workflow.
+
+---
+
+## ✨ Key Features
+
+### 👤 Multi-Role System
+- Customer  
+- Restaurant Owner  
+- Delivery Rider  
+
+Each role has:
+- Separate UI  
+- Separate permissions  
+- Separate order flow  
+
+---
+
+### 🧑‍🍳 Customer Features
+- User authentication (JWT)  
+- Browse restaurants & food items  
+- Place orders (COD)  
+- View order history  
+- Track active orders on map  
+- View assigned rider details  
+- Chat with rider (Socket.io)  
+- OTP-based delivery verification  
+- Rate ordered items (basic implementation)  
+
+---
+
+### 🏪 Restaurant Owner Features
+- View customer orders  
+- Update order status:  
+  - Pending → Preparing → Out for Delivery → Delivered  
+- Automatic rider assignment (based on availability)  
+- View assigned rider details  
+- Clean order management UI  
+
+---
+
+### 🛵 Delivery Rider Features
+- View assigned active order  
+- Live location tracking  
+- View customer & restaurant details  
+- Chat with customer  
+- OTP input to confirm successful delivery  
+- Rider dashboard UI  
+- Fake analytics dashboard (UI-only using charts)  
+
+---
+
+### 💬 Real-Time Chat (Socket.io)
+- Customer ↔ Rider messaging  
+- Order-specific chat rooms  
+- No page refresh required  
+- Socket used only for chat & live updates  
+
+---
+
+### 🗺️ Live Order Tracking
+- Rider location fetched using browser Geolocation API  
+- Location displayed on map  
+- Customer can track rider movement during delivery  
+
+---
+
+### 🔐 OTP Delivery Confirmation
+- OTP generated when order is out for delivery  
+- Customer shares OTP with rider  
+- Rider enters OTP to complete delivery  
+- Prevents fake delivery confirmation  
+
+---
+
+## 🧠 Tech Stack
+
+### Frontend
+- React (Vite)  
+- Tailwind CSS  
+- Zustand (state management)  
+- Axios  
+- Socket.io Client  
+- Leaflet (Maps)  
+- Recharts (dashboard charts – UI only)  
+
+### Backend
+- Node.js  
+- Express  
+- MongoDB + Mongoose  
+- Socket.io  
+- JWT Authentication (Cookies)  
+- Geospatial Queries (rider proximity)  
+- OTP logic  
+
+---
+
+## 🏗️ Architecture
+- REST APIs for orders, users, riders  
+- Socket.io for real-time chat  
+- JWT stored in httpOnly cookies  
+- Role-based route protection  
+- Centralized order lifecycle management  
+
+---
+
+## 📁 Project Structure  - Payments: Razorpay Web SDK
 - Backend (Express 5)
   - API: REST endpoints under /api/* (auth, user, shop, item, order, admin)
   - DB: MongoDB via Mongoose (User, Shop, Item, Order, DeliveryAssignment)
