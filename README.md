@@ -1,4 +1,4 @@
-# 🍔 Chindi — Full-Stack Food Delivery Web Application
+# Chindi — Full-Stack Food Delivery Web Application
 
 Chindi is a full-stack food delivery web application that connects **Customers**, **Restaurant Owners**, and **Delivery Riders** on a single platform.  
 It supports role-based dashboards, live order tracking, rider assignment, OTP-based delivery confirmation, real-time chat, and a modern mobile-first UI.
