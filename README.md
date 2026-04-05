@@ -327,8 +327,6 @@ Backend (backend/package.json)
 ## Contributing
 Contributions are welcome. Please fork, create a feature branch, and submit a PR with a clear description.
 
-## License
-MIT
 
 ---
 
