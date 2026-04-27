@@ -12,12 +12,22 @@ export const generateToken = (userId,res) => {
         expiresIn: '7d',
     });
 
-res.cookie("jwt_token", token, { // Changed "token" to "jwt_token"
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-  maxAge: 7 * 24 * 60 * 60 * 1000, 
-});
+ // Auto detect environment
+  const isProduction = process.env.NODE_ENV === "production";
+
+  res.cookie("jwt_token", token, {
+    httpOnly: true,
+
+    // localhost → false
+    // deployed/live → true
+    secure: isProduction,
+
+    // localhost → "lax"
+    // deployed/live → "none"
+    sameSite: isProduction ? "none" : "lax",
+
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
 
 
     return token;

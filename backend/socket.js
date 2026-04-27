@@ -5,13 +5,15 @@ let io;
 export const initSocket = (server) => {
   // CORS configuration for socket.io - allow multiple origins
   const allowedOrigins = [
-    "https://vingo-local-restaurant-app.onrender.com",
     "https://chindi-backend.onrender.com",
     "http://localhost:5173",
     "http://localhost:5174",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:5174",
   ];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 
   io = new Server(server, {
     cors: {
