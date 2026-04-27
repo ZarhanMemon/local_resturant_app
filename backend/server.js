@@ -26,29 +26,10 @@ const app = express();
 app.set("trust proxy", 1); // Allow secure cookies behind Render's proxy
 
 // CORS configuration - allow multiple origins for development and production
-const allowedOrigins = [
-  "https://vingo-local-restaurant-app.onrender.com",
-  "https://chindi-backend.onrender.com",
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://127.0.0.1:5173",
-  "http://127.0.0.1:5174",
-];
-
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors({
+  origin: "https://chindi-local-restaurant-app.onrender.com", 
+  credentials: true
+}));
 
 
 

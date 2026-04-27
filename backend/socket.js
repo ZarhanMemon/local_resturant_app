@@ -15,16 +15,11 @@ export const initSocket = (server) => {
 
   io = new Server(server, {
     cors: {
-      origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error("Not allowed by CORS"));
-        }
-      },
+      origin: allowedOrigins, // You can pass the array directly to simplified it
       credentials: true,
-      methods: ["POST", "GET"],
+      methods: ["GET", "POST"],
     },
+   
   });
 
   io.on("connection", (socket) => {
