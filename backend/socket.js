@@ -15,9 +15,6 @@ export const initSocket = (server) => {
 
   io = new Server(server, {
     cors: {
-<<<<<<< HEAD
-      origin: "https://chindi-local-restaurant-app.onrender.com", // allow any origin in development (adjust for production)
-=======
       origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {
           callback(null, true);
@@ -25,7 +22,6 @@ export const initSocket = (server) => {
           callback(new Error("Not allowed by CORS"));
         }
       },
->>>>>>> fb3ecc7 (redeploying)
       credentials: true,
       methods: ["POST", "GET"],
     },

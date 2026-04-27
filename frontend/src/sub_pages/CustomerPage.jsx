@@ -33,11 +33,7 @@ const categories = [
   },
   { 
     category: "Chinese", 
-<<<<<<< HEAD
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSw7zz3zivNGiMdZc3KyB5y5F9Lr09P4vCFKmGv0Y9b0KFsiEqHGIiweX8&s" 
-=======
     image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=137&h=137&fit=crop" 
->>>>>>> fb3ecc7 (redeploying)
   },
   { 
     category: "Beverages", 

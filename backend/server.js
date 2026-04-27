@@ -37,9 +37,6 @@ const allowedOrigins = [
 
 app.use(
   cors({
-<<<<<<< HEAD
-    origin: "https://chindi-local-restaurant-app.onrender.com", // EXACT frontend URL
-=======
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
@@ -47,7 +44,6 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
->>>>>>> fb3ecc7 (redeploying)
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
