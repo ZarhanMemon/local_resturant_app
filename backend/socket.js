@@ -3,11 +3,31 @@ import { Server } from "socket.io";
 let io;
 
 export const initSocket = (server) => {
+  // CORS configuration for socket.io - allow multiple origins
+  const allowedOrigins = [
+    "https://vingo-local-restaurant-app.onrender.com",
+    "https://chindi-backend.onrender.com",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+  ];
+
   io = new Server(server, {
     cors: {
+<<<<<<< HEAD
       origin: "https://chindi-local-restaurant-app.onrender.com", // allow any origin in development (adjust for production)
+=======
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
+>>>>>>> fb3ecc7 (redeploying)
       credentials: true,
-      methods:['POST','GET']
+      methods: ["POST", "GET"],
     },
   });
 

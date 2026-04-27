@@ -29,11 +29,15 @@ const categories = [
   },
   { 
     category: "Desserts", 
-    image: "https://lh3.googleusercontent.com/gps-proxy/ALd4DhH4qOoxJf1l6KFH-5NdgOmvoZJtUP3tqjpEG8cHFbevEj2FrLUnrYSe1ju3w1Tglu1kjhHbMGTbRIJw7OqIMHqjls1mablZkfaqt5Wr9iAIGB5ZN1TOXPo35CAI03-dSkMNOj7N0t67AEztuID0J9ws5TKtaEwWl03dQXuBn2kHQS54swwS8hmu=w137-h137-n-k-no" 
+    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=137&h=137&fit=crop" 
   },
   { 
     category: "Chinese", 
+<<<<<<< HEAD
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSw7zz3zivNGiMdZc3KyB5y5F9Lr09P4vCFKmGv0Y9b0KFsiEqHGIiweX8&s" 
+=======
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=137&h=137&fit=crop" 
+>>>>>>> fb3ecc7 (redeploying)
   },
   { 
     category: "Beverages", 
