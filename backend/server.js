@@ -26,10 +26,17 @@ const app = express();
 app.set("trust proxy", 1); // Allow secure cookies behind Render's proxy
 
 // CORS configuration - allow multiple origins for development and production
-app.use(cors({
-  origin: "https://chindi-local-restaurant-app.onrender.com", 
-  credentials: true
-}));
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://chindi-local-restaurant-app.onrender.com",
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 
 
 
